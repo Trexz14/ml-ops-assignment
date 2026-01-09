@@ -3,11 +3,11 @@ requires = ["uv_build>=0.9.22,<0.10.0"]
 build-backend = "uv_build"
 
 [project]
-name = "ml_ops_assignment"
+name = "project_name"
 version = "0.0.1"
-description = "to_be_written"
+description = "A short description of the project."
 authors = [
-  { name = "group_63", email = "your@email.com" },
+  { name = "Your name (or your organization/company/team)", email = "your@email.com" },
 ]
 
 keywords = ["machine learning", "MLOps"]

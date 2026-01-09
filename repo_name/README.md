@@ -1,6 +1,6 @@
-# ml_ops_assignment
+# project_name
 
-to_be_written
+A short description of the project.
 
 ## Project structure
 

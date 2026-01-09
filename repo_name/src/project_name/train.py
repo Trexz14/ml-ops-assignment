@@ -1,5 +1,5 @@
-from ml_ops_assignment.model import Model
-from ml_ops_assignment.data import MyDataset
+from project_name.model import Model
+from project_name.data import MyDataset
 
 def train():
     dataset = MyDataset("data/raw")
