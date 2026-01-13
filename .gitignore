@@ -3,9 +3,6 @@ docs/site/
 # test cache
 manual_test/
 
-# uv lock file (platform-specific)
-uv.lock
-
 # other local dev info
 .vscode/
 
