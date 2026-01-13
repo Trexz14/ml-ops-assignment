@@ -18,9 +18,11 @@ classifiers = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "datasets>=4.4.2",
     "fastapi==0.115.6",
     "torch==2.6.0",
-    "typer==0.15.1",
+    "transformers>=4.57.5",
+    "typer==0.12.5",
     "uvicorn==0.34.0",
 ]
 
@@ -34,6 +36,7 @@ dev = [
     "mypy==1.19.1",
     "mkdocs-material==9.7.1",
     "mkdocstrings-python==2.0.1",
+    "dvc>=3.66.1",
 ]
 
 
