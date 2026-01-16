@@ -1,0 +1,34 @@
+# Default experiment configuration for text classification model
+# This model predicts text quality on a scale from 0-2 (0: worst, 2: best)
+
+model:
+  # Pre-trained transformer model to use as base
+  model_name: "prajjwal1/bert-mini"  # Lightweight BERT model
+  num_labels: 3  # Number of classes (0, 1, 2)
+  dropout: 0.1  # Dropout rate for regularization
+  hidden_size: 256  # Hidden size for the model
+
+training:
+  # Optimizer settings
+  optimizer: "adam"  # Optimizer type (adam, adamw, sgd)
+  learning_rate: 2.0e-5  # Learning rate for optimizer
+  weight_decay: 0.01  # Weight decay for regularization
+  
+  # Loss function
+  loss_function: "cross_entropy"  # Loss function (cross_entropy, focal_loss)
+  
+  # Training parameters
+  batch_size: 32  # Batch size for training
+  num_epochs: 10  # Number of training epochs
+  gradient_clip: 1.0  # Maximum gradient norm for clipping
+  do_validation: true  # Run validation after each epoch
+  
+  # Data settings
+  data_path: "data/processed"  # Path to processed data
+  
+  # Checkpointing
+  save_every: 1  # Save model checkpoint every N epochs
+  checkpoint_dir: "models"  # Directory to save model checkpoints
+
+# Device configuration
+device: "cuda"  # Device to use (cuda, mps, cpu) - will auto-detect if not available
