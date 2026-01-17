@@ -19,7 +19,12 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "datasets>=4.4.2",
+    "dvc>=3.66.1",
+    "dvc-gdrive>=3.0.1",
     "fastapi==0.115.6",
+    "loguru>=0.7.3",
+    "markdown>=3.10",
+    "pydantic>=2.12.5",
     "torch==2.6.0",
     "transformers>=4.57.5",
     "typer==0.12.5",
