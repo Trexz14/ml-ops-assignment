@@ -1,4 +1,4 @@
 [core]
     remote = storage
 ['remote "storage"']
-    url = gdrive://1TWe87Y489pm9f2qGfa4Ka5rOhiejPfcT?hl=da
+    url = gs://mlops-dtu-data/dvc-cache

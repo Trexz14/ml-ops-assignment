@@ -19,8 +19,8 @@ def load_data():
 
 @app.command()
 def process(
-    output_folder: Path = typer.Option(Path("data/processed"), help="Path to save processed data"),
-    model_name: str = typer.Option("prajjwal1/bert-mini", help="Model name for tokenizer")
+    output_folder: Path = typer.Argument(Path("data/processed"), help="Path to save processed data"),
+    model_name: str = typer.Argument("prajjwal1/bert-mini", help="Model name for tokenizer")
 ):
     """
     Load raw data, tokenize it, and save the processed dataset to disk.
@@ -45,7 +45,7 @@ def process(
 
     def tokenize_function(examples):
         """Tokenize the text column with padding and truncation."""
-        return tokenizer(examples["text"], padding="max_length", truncation=True)
+        return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=512)
 
     typer.echo("Tokenizing data...")
     # Batched tokenization
@@ -104,6 +104,22 @@ def process(
     final_dataset.save_to_disk(output_folder)
     typer.echo("Done!")
 
+def collate_fn(batch):
+    """Custom collate function to pad sequences to the same length in a batch."""
+    input_ids = [item['input_ids'] for item in batch]
+    attention_mask = [item['attention_mask'] for item in batch]
+    labels = torch.tensor([item['label'] for item in batch])
+    
+    # Pad sequences to max length in batch
+    input_ids = torch.nn.utils.rnn.pad_sequence(input_ids, batch_first=True, padding_value=0)
+    attention_mask = torch.nn.utils.rnn.pad_sequence(attention_mask, batch_first=True, padding_value=0)
+    
+    return {
+        'input_ids': input_ids,
+        'attention_mask': attention_mask,
+        'label': labels
+    }
+
 def get_dataloaders(data_path: Path, batch_size: int = 32, split: str = "train") -> DataLoader:
     """
     Load the processed data from disk and return a PyTorch DataLoader for a specific split.
@@ -127,7 +143,7 @@ def get_dataloaders(data_path: Path, batch_size: int = 32, split: str = "train")
     # Shuffle only for training
     shuffle = (split == "train")
     
-    data_loader = DataLoader(dataset[split], batch_size=batch_size, shuffle=shuffle)
+    data_loader = DataLoader(dataset[split], batch_size=batch_size, shuffle=shuffle, collate_fn=collate_fn)
     
     return data_loader
 
