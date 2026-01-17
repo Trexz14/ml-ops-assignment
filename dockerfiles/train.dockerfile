@@ -1,14 +1,32 @@
-FROM ghcr.io/astral-sh/uv:python3.12-alpine AS base
+# Train dockerfile for ml_ops_assignment
+# Builds an image that can train the text classification model
 
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS base
+
+# Install build essentials (needed for some Python packages)
+RUN apt update && \
+    apt install --no-install-recommends -y build-essential gcc && \
+    apt clean && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files first (for better Docker cache)
 COPY uv.lock uv.lock
 COPY pyproject.toml pyproject.toml
-
-RUN uv sync --frozen --no-install-project
-
-COPY src src/
 COPY README.md README.md
-COPY LICENSE LICENSE
 
-RUN uv sync --frozen
+# Install dependencies (cached separately from code changes)
+ENV UV_LINK_MODE=copy
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-project
 
-ENTRYPOINT ["uv", "run", "src/ml_ops_assignment/train.py"]
+# Copy application code
+COPY src/ src/
+COPY configs/ configs/
+COPY data/ data/
+
+# Install the project itself
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen
+
+# Set entrypoint to run training
+ENTRYPOINT ["uv", "run", "python", "-u", "src/ml_ops_assignment/train.py"]
