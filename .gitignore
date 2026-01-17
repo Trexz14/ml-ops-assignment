@@ -178,3 +178,4 @@ cython_debug/
 
 # Course Context
 course_material/
+/models
