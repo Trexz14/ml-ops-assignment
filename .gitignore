@@ -181,3 +181,4 @@ course_material/
 
 # Logging 
 .env
+/models
