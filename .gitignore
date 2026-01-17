@@ -178,3 +178,13 @@ cython_debug/
 
 # Course Context
 course_material/
+
+# Model checkpoints and outputs
+models/
+*.pt
+*.pth
+*.ckpt
+
+# Hydra outputs (if using Hydra)
+outputs/
+multirun/
