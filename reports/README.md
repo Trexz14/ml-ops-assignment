@@ -122,7 +122,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 1 fill here ---
+MLOps 63
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -133,7 +133,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 2 fill here ---
+s234869, s245176, s244742, 
 
 ### Question 3
 > **A requirement to the project is that you include a third-party package not covered in the course. What framework**

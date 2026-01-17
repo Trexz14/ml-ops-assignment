@@ -25,10 +25,12 @@ dependencies = [
     "loguru>=0.7.3",
     "markdown>=3.10",
     "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
     "torch==2.6.0",
     "transformers>=4.57.5",
     "typer==0.12.5",
     "uvicorn==0.34.0",
+    "wandb>=0.24.0",
 ]
 
 [dependency-groups]

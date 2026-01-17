@@ -4,6 +4,13 @@ Training script for the text classification model.
 This script provides a simple command-line interface to train the model
 using the configuration file. It imports and uses the train function from model.py.
 """
+
+from dotenv import load_dotenv
+load_dotenv()
+
+import os 
+import wandb
+
 from pathlib import Path
 
 import typer
@@ -29,10 +36,18 @@ def main(
     """
     typer.echo(f"Starting training with config: {config_path}")
 
+    wandb.init(
+        project=os.getenv("WANDB_PROJECT"),
+        entity=os.getenv("WANDB_ENTITY"),
+    )
+
     # Train the model
     train(config_path=config_path, checkpoint_path=checkpoint)
 
     typer.echo("Training completed successfully!")
+
+    # ✅ FINISH WANDB HERE
+    wandb.finish()
 
 
 if __name__ == "__main__":
