@@ -103,6 +103,57 @@ def load_config(config_path: Path) -> Dict:
     return config
 
 
+def load_model(
+    checkpoint_path: Path,
+    config_path: Optional[Path] = None,
+    device: Optional[torch.device] = None,
+) -> TextClassificationModel:
+    """
+    Load a trained model from checkpoint.
+
+    Args:
+        checkpoint_path: Path to the model checkpoint (.pt file)
+        config_path: Optional path to config file (will infer from checkpoint if not provided)
+        device: Device to load model to (defaults to CPU)
+
+    Returns:
+        Loaded model ready for inference
+    """
+    if device is None:
+        device = torch.device("cpu")
+
+    # Load checkpoint
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+
+    # Get model config from checkpoint or config file
+    if "config" in checkpoint:
+        model_config = checkpoint["config"]
+    elif config_path is not None:
+        config = load_config(config_path)
+        model_config = config["model"]
+    else:
+        raise ValueError("Config not found in checkpoint and no config_path provided")
+
+    # Initialize model
+    model = TextClassificationModel(
+        model_name=model_config["model_name"],
+        num_labels=model_config["num_labels"],
+        dropout=model_config.get("dropout", 0.1),
+        hidden_size=model_config.get("hidden_size", 256),
+    )
+
+    # Load state dict
+    if "model_state_dict" in checkpoint:
+        model.load_state_dict(checkpoint["model_state_dict"])
+    else:
+        model.load_state_dict(checkpoint)
+
+    model.to(device)
+    model.eval()
+
+    return model
+
+
 def get_device(config: Dict) -> torch.device:
     """
     Get the appropriate device for training based on config and availability.

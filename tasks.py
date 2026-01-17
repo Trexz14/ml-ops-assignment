@@ -18,6 +18,15 @@ def train(ctx: Context) -> None:
     ctx.run(f"PYTHONPATH=src uv run python src/{PROJECT_NAME}/train.py", echo=True, pty=not WINDOWS)
 
 @task
+def evaluate(ctx: Context, checkpoint: str = "models/model_final.pt", split: str = "test") -> None:
+    """Evaluate trained model on test set."""
+    ctx.run(
+        f"PYTHONPATH=src uv run python src/{PROJECT_NAME}/evaluate.py {checkpoint} {split}",
+        echo=True,
+        pty=not WINDOWS
+    )
+
+@task
 def test(ctx: Context) -> None:
     """Run tests."""
     ctx.run("uv run coverage run -m pytest tests/", echo=True, pty=not WINDOWS)
