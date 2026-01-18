@@ -43,6 +43,15 @@ uv run invoke preprocess-data
 uv run invoke train
 ```
 
+## Inference API
+```bash
+# Start the API server
+uv run invoke serve-api
+
+# The API will be available at http://127.0.0.1:8000
+# Documentation (Swagger UI) at http://127.0.0.1:8000/docs
+```
+
 ## Run Tests
 ```bash
 # All tests
