@@ -4,7 +4,7 @@
 not written yet
 
 Dataset from: https://huggingface.co/datasets/SetFit/onestop_english
-Encoder from: https://huggingface.co/docs/transformers/model_doc/distilbert
+Encoder from: https://huggingface.co/docs/transformers/model_doc/bert
 
 
 ## Project structure

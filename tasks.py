@@ -56,3 +56,8 @@ def build_docs(ctx: Context) -> None:
 def serve_docs(ctx: Context) -> None:
     """Serve documentation."""
     ctx.run("uv run mkdocs serve --config-file docs/mkdocs.yaml", echo=True, pty=not WINDOWS)
+
+@task
+def serve_api(ctx: Context) -> None:
+    """Run the FastAPI server."""
+    ctx.run(f"PYTHONPATH=src uv run uvicorn {PROJECT_NAME}.api:app --reload", echo=True, pty=not WINDOWS)
