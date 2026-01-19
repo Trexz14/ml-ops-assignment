@@ -159,9 +159,9 @@ To test Intel Mac compatibility in CI:
 │  ┌───────────────────────────────────┐  │
 │  │ uv environment                    │  │
 │  │ - All dependencies except PyTorch │  │
-│  │ - Can run invoke, ruff, etc.     │  │
+│  │ - Can run invoke, ruff, etc.      │  │
 │  └───────────────────────────────────┘  │
-│                                          │
+│                                         │
 │  ┌───────────────────────────────────┐  │
 │  │ Docker Container (Linux)          │  │
 │  │ - Complete environment            │  │
