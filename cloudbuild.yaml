@@ -1,0 +1,52 @@
+# Google Cloud Build Configuration
+# This file is used by GCP to build and push our Docker images to Artifact Registry.
+# It is triggered by our GitHub Actions workflow (.github/workflows/docker-build.yaml).
+
+steps:
+# Step 1: Build the API image
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Build API image'
+  args: [
+    'build',
+    '.',
+    '-t',
+    '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REGISTRY_NAME}/api:latest',
+    '-f',
+    'dockerfiles/api.dockerfile'
+  ]
+
+# Step 2: Push the API image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push API image'
+  args: [
+    'push',
+    '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REGISTRY_NAME}/api:latest'
+  ]
+
+# Step 3: Build the Training image
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Build Train image'
+  args: [
+    'build',
+    '.',
+    '-t',
+    '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REGISTRY_NAME}/train:latest',
+    '-f',
+    'dockerfiles/train.dockerfile'
+  ]
+
+# Step 4: Push the Training image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push Train image'
+  args: [
+    'push',
+    '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REGISTRY_NAME}/train:latest'
+  ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# Variables we can change without touching the code above
+substitutions:
+  _REGION: 'europe-west1'
+  _REGISTRY_NAME: 'mlops-registry'

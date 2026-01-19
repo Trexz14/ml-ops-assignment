@@ -1,0 +1,38 @@
+name: Docker Build (GCP Handshake)
+
+# This workflow connects GitHub to Google Cloud Build.
+# It doesn't build the images on GitHub; it tells Google to do it.
+
+on:
+  push:
+    branches: [main]       # Trigger on every push to the main branch if files in these paths change:
+    paths:                
+      - 'src/**'          
+      - 'dockerfiles/**'  
+      - 'pyproject.toml'  
+      - 'cloudbuild.yaml' 
+  workflow_dispatch:      # Allows us to run it manually from the "Actions" tab
+
+jobs:
+  trigger-gcp-build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Get the code from GitHub
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Log in to Google Cloud
+      - name: Auth with GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
+
+      # 3. Get the 'gcloud' command ready
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # 4. The "Handshake"
+      # This command sends the current folder to GCP and says "Follow the recipe in cloudbuild.yaml"
+      - name: Submit build to GCP
+        run: |
+          gcloud builds submit . --config cloudbuild.yaml

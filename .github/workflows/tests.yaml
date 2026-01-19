@@ -17,6 +17,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Auth with GCP
+        if: matrix.operating-system == 'ubuntu-latest'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
+
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
@@ -27,6 +33,11 @@ jobs:
         run: |
           uv sync --locked --dev
           uv tree
+
+      - name: Get data (DVC)
+        if: matrix.operating-system == 'ubuntu-latest'
+        run: |
+          uv run dvc pull
 
       - name: Run tests & coverage
         run: |
