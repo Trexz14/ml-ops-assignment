@@ -3,6 +3,11 @@
 
 not written yet
 
+> **⚠️ Intel Mac Users:** This project uses PyTorch 2.6.0, which doesn't have wheels for Intel Macs with `uv`. 
+> Please see [INTEL_MAC_GUIDE.md](INTEL_MAC_GUIDE.md) for Docker-based setup instructions.
+
+**Quick Start:** See [QUICKSTART.md](QUICKSTART.md) for setup and usage instructions.
+
 Dataset from: https://huggingface.co/datasets/SetFit/onestop_english
 Encoder from: https://huggingface.co/docs/transformers/model_doc/bert
 
