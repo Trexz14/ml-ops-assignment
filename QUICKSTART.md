@@ -47,9 +47,14 @@ uv run invoke train
 ```bash
 # Start the API server
 uv run invoke serve-api
+```
+Once the server is running, you can test it with `curl`. The default URL is usually `http://127.0.0.1:8000`, but please check your terminal output for the actual address:
 
-# The API will be available at http://127.0.0.1:8000
-# Documentation (Swagger UI) at http://127.0.0.1:8000/docs
+```bash
+curl -X 'POST' \
+  'http://<API_URL>/predict' \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "This is a very simple sentence for testing."}'
 ```
 
 ## Run Tests
