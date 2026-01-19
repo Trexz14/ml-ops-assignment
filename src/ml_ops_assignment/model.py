@@ -8,6 +8,9 @@ from torch.optim import Adam
 from transformers import AutoModel
 
 from ml_ops_assignment.data import get_dataloaders
+from ml_ops_assignment.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class TextClassificationModel(nn.Module):
@@ -98,9 +101,15 @@ def load_config(config_path: Path) -> Dict:
     Returns:
         Dictionary containing configuration parameters
     """
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-    return config
+    logger.info(f"Loading configuration from {config_path}")
+    try:
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f)
+        logger.success(f"Configuration loaded successfully from {config_path}")
+        return config
+    except Exception as e:
+        logger.error(f"Failed to load configuration from {config_path}: {e}")
+        raise
 
 
 def load_model(
@@ -119,22 +128,29 @@ def load_model(
     Returns:
         Loaded model ready for inference
     """
+    logger.info(f"Loading model from checkpoint: {checkpoint_path}")
+
     if device is None:
         device = torch.device("cpu")
 
     # Load checkpoint
+    logger.debug(f"Loading checkpoint to device: {device}")
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
 
     # Get model config from checkpoint or config file
     if "config" in checkpoint:
         model_config = checkpoint["config"]
+        logger.debug("Using config from checkpoint")
     elif config_path is not None:
         config = load_config(config_path)
         model_config = config["model"]
+        logger.debug(f"Using config from file: {config_path}")
     else:
+        logger.error("Config not found in checkpoint and no config_path provided")
         raise ValueError("Config not found in checkpoint and no config_path provided")
 
     # Initialize model
+    logger.info(f"Initializing model: {model_config['model_name']}")
     model = TextClassificationModel(
         model_name=model_config["model_name"],
         num_labels=model_config["num_labels"],
@@ -145,11 +161,14 @@ def load_model(
     # Load state dict
     if "model_state_dict" in checkpoint:
         model.load_state_dict(checkpoint["model_state_dict"])
+        logger.debug("Loaded model_state_dict from checkpoint")
     else:
         model.load_state_dict(checkpoint)
+        logger.debug("Loaded state dict directly from checkpoint")
 
     model.to(device)
     model.eval()
+    logger.success(f"Model loaded successfully and set to eval mode on {device}")
 
     return model
 
@@ -167,11 +186,16 @@ def get_device(config: Dict) -> torch.device:
     preferred_device = config.get("device", "cuda")
 
     if preferred_device == "cuda" and torch.cuda.is_available():
-        return torch.device("cuda")
+        device = torch.device("cuda")
+        logger.info(f"Using CUDA device: {torch.cuda.get_device_name(0)}")
     elif preferred_device == "mps" and torch.backends.mps.is_available():
-        return torch.device("mps")
+        device = torch.device("mps")
+        logger.info("Using MPS (Apple Silicon) device")
     else:
-        return torch.device("cpu")
+        device = torch.device("cpu")
+        logger.info("Using CPU device")
+
+    return device
 
 
 def get_loss_function(loss_name: str) -> nn.Module:
@@ -211,13 +235,14 @@ def evaluate(
     Returns:
         Dict with keys `loss` and `accuracy` (percentage)
     """
+    logger.info("Starting model evaluation")
     model.eval()
     total_loss = 0.0
     correct = 0
     total = 0
 
     with torch.no_grad():
-        for batch in dataloader:
+        for batch_idx, batch in enumerate(dataloader):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["label"].to(device)
@@ -230,8 +255,12 @@ def evaluate(
             correct += (preds == labels).sum().item()
             total += labels.size(0)
 
+            if (batch_idx + 1) % 20 == 0:
+                logger.debug(f"Evaluation batch [{batch_idx+1}/{len(dataloader)}]")
+
     avg_loss = total_loss / len(dataloader) if len(dataloader) > 0 else 0.0
     accuracy = 100 * correct / total if total > 0 else 0.0
+    logger.info(f"Evaluation complete: Loss={avg_loss:.4f}, Accuracy={accuracy:.2f}%")
     return {"loss": avg_loss, "accuracy": accuracy}
 
 
@@ -257,12 +286,22 @@ def train(
         Trained model
     """
     # Load configuration
+    logger.info("=" * 60)
+    logger.info("Starting training pipeline")
+    logger.info(f"Configuration file: {config_path}")
+    logger.info("=" * 60)
+
     print(f"Loading configuration from {config_path}")
     config = load_config(config_path)
 
     # Extract configuration sections
     model_config = config["model"]
     training_config = config["training"]
+
+    logger.info(f"Model: {model_config['model_name']}")
+    logger.info(f"Training epochs: {training_config['num_epochs']}")
+    logger.info(f"Batch size: {training_config['batch_size']}")
+    logger.info(f"Learning rate: {training_config['learning_rate']}")
 
     # Set up device
     device = get_device(config)
@@ -280,7 +319,10 @@ def train(
     # Load checkpoint if provided
     if checkpoint_path and checkpoint_path.exists():
         print(f"Loading checkpoint from {checkpoint_path}")
+        logger.info(f"Resuming from checkpoint: {checkpoint_path}")
         model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+    else:
+        logger.info("Starting training from scratch (no checkpoint provided)")
 
     model = model.to(device)
 
@@ -310,13 +352,18 @@ def train(
     gradient_clip = training_config["gradient_clip"]
 
     print(f"\nStarting training for {num_epochs} epochs...")
+    logger.info(f"Training configuration: {num_epochs} epochs, gradient_clip={gradient_clip}")
+
     if do_validation and val_loader is not None:
         print(f"Training batches: {len(train_loader)}, Validation batches: {len(val_loader)}")
+        logger.info(f"Training batches: {len(train_loader)}, Validation batches: {len(val_loader)}")
     else:
         print(f"Training batches: {len(train_loader)}, Validation disabled")
+        logger.info(f"Training batches: {len(train_loader)}, Validation disabled")
 
     for epoch in range(num_epochs):
         # Training phase
+        logger.info(f"Epoch [{epoch+1}/{num_epochs}] - Training phase started")
         model.train()
         train_loss = 0.0
         train_correct = 0
@@ -381,6 +428,12 @@ def train(
         print(f"Val Loss: {avg_val_loss:.4f}, Val Accuracy: {val_accuracy:.2f}%")
         print(f"{'='*60}\n")
 
+        logger.info(
+            f"Epoch [{epoch+1}/{num_epochs}] Summary: "
+            f"Train Loss={avg_train_loss:.4f}, Train Acc={train_accuracy:.2f}%, "
+            f"Val Loss={avg_val_loss:.4f}, Val Acc={val_accuracy:.2f}%"
+        )
+
         # Save checkpoint
         if (epoch + 1) % training_config["save_every"] == 0:
             checkpoint_dir = Path(training_config["checkpoint_dir"])
@@ -389,11 +442,13 @@ def train(
             checkpoint_file = checkpoint_dir / f"model_epoch_{epoch+1}.pt"
             torch.save(model.state_dict(), checkpoint_file)
             print(f"Checkpoint saved to {checkpoint_file}")
+            logger.info(f"Checkpoint saved: {checkpoint_file}")
 
     # Save final model
     final_model_path = Path(training_config["checkpoint_dir"]) / "model_final.pt"
     torch.save(model.state_dict(), final_model_path)
     print(f"\nTraining complete! Final model saved to {final_model_path}")
+    logger.success(f"Training completed successfully! Final model saved to {final_model_path}")
 
     return model
 

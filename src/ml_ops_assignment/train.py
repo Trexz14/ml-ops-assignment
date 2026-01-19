@@ -13,9 +13,11 @@ import wandb
 from dotenv import load_dotenv
 
 from ml_ops_assignment.model import train
+from ml_ops_assignment.logging_config import get_logger
 
 load_dotenv()
 
+logger = get_logger(__name__)
 app = typer.Typer()
 
 
@@ -33,20 +35,41 @@ def main(
         config_path: Path to the YAML configuration file
         checkpoint: Optional path to resume training from a checkpoint
     """
+    logger.info("=" * 70)
+    logger.info("Training Script Started")
+    logger.info(f"Config path: {config_path}")
+    logger.info(f"Checkpoint: {checkpoint if checkpoint else 'None (training from scratch)'}")
+    logger.info("=" * 70)
+
     typer.echo(f"Starting training with config: {config_path}")
 
-    wandb.init(
-        project=os.getenv("WANDB_PROJECT"),
-        entity=os.getenv("WANDB_ENTITY"),
-    )
+    # Initialize W&B
+    wandb_project = os.getenv("WANDB_PROJECT")
+    wandb_entity = os.getenv("WANDB_ENTITY")
+
+    if wandb_project and wandb_entity:
+        logger.info(f"Initializing W&B: project={wandb_project}, entity={wandb_entity}")
+        wandb.init(
+            project=wandb_project,
+            entity=wandb_entity,
+        )
+        logger.success("W&B initialized successfully")
+    else:
+        logger.warning("W&B credentials not found in environment variables. Skipping W&B initialization.")
 
     # Train the model
     train(config_path=config_path, checkpoint_path=checkpoint)
 
     typer.echo("Training completed successfully!")
+    logger.success("Training completed successfully!")
 
     # ✅ FINISH WANDB HERE
-    wandb.finish()
+    if wandb.run is not None:
+        logger.info("Finishing W&B run")
+        wandb.finish()
+        logger.success("W&B run finished")
+    else:
+        logger.debug("No active W&B run to finish")
 
 
 if __name__ == "__main__":
