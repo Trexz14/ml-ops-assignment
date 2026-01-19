@@ -120,7 +120,7 @@ will check the repositories and the code to verify your answers.
 ### Question 1
 > **Enter the group number you signed up on <learn.inside.dtu.dk>**
 >
-> Answer:
+> Answer: 
 
 MLOps 63
 
@@ -167,7 +167,9 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 4 fill here ---
+We used **uv** for dependency management because it's significantly faster than pip and keeps our builds deterministic. Everything we need is listed in `pyproject.toml`, while `uv` handles the `uv.lock` file to pin every single package version. This means the whole team is always running on the exact same setup, which pretty much killed any "it works on my machine" issues. To get the environment running, a new member just needs to install uv (`curl -LsSf https://astral.sh/uv/install.sh | sh`), clone the repo, and run `uv sync` to set up the virtual environment and dependencies. Using `uv sync --frozen` ensures you're using the exact versions from the lock file without any surprises. Whenever we need a new tool, we just run `uv add <package>`, which keeps the `pyproject.toml` and lock file perfectly in sync and prevents dependency conflicts.
+
+
 
 ### Question 5
 
@@ -183,7 +185,7 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 5 fill here ---
+We initialized our project using the cookiecutter template provided in the course, but the one with the agentcdocuments. We filled out the standard folders including `src/ml_ops_assignment/` for our source code (data.py, model.py, train.py, evaluate.py, api.py, visualize.py), `tests/` for pytest unit tests, `data/` for our processed dataset, `models/` for trained model checkpoints, `configs/` for configuration files, and `reports/` for this report. We also added `dockerfiles/` for our Docker containers and `docs/` for MkDocs documentation. The main deviation from the template was adding a `documents/` folder in the root directory to organize all agent-related documents (AGENTS.md, agent prompts) and project management files (checklist.md, project_description.md). This kept our root directory clean while maintaining easy access to documentation for both human developers and AI coding agents. We also use `tasks.py` with the `invoke` library instead of a Makefile for task automation, which provides better Python integration. 
 
 ### Question 6
 
@@ -198,7 +200,7 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 6 fill here ---
+We used Ruff for both linting and formatting since it's faster than traditional tools like flake8 and black. It enforces a 120-character line length and catches common Python issues. For type checking, we use mypy to verify type hints across our codebase. We tried to keep all functions and classes with consistent formatted docstrings explaining their purpose, parameters, and return values. For documentation, we created a QUICKSTART.md that provides quick setup instructions and common commands for running tests, training, evaluation, and API deployment. These practices matter in larger projects because they prevent bugs early, make code easier to understand for new team members, and ensure consistency across the codebase. Type hints catch type-related bugs at development time instead of runtime, while consistent formatting eliminates style debates and makes code reviews focus on logic. Documentation ensures that anyone can get started quickly without having to reverse-engineer the codebase.
 
 ## Version control
 
@@ -217,7 +219,7 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 7 fill here ---
+We implemented 57 unit tests across three test files: test_data.py, test_model.py, and test_api.py. The data tests verify dataset loading from Hugging Face, batch collation, padding, and DataLoader functionality. Model tests check model initialization, forward pass correctness, output shapes, configuration loading, device handling, and the evaluation function. API tests validate the FastAPI health check endpoint, prediction endpoint functionality with various inputs including edge cases, and error handling for invalid requests. These tests ensure the critical components of our pipeline work correctly before deployment. 
 
 ### Question 8
 
@@ -232,7 +234,7 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 8 fill here ---
+Our total code coverage is 44%, which we know is far from 100%. However, we focused on testing all the main components we considered critical: data loading and preprocessing, model initialization and forward passes, and API endpoints. While higher coverage would be ideal, even 100% coverage wouldn't guarantee error-free code. Code coverage only measures which lines are executed during tests, not whether those tests check the right behavior or edge cases. You could have 100% coverage by simply running every line once without actually asserting anything meaningful. Real bugs often come from unexpected interactions between components, race conditions, incorrect business logic, or edge cases that weren't anticipated in the tests. Additionally, coverage doesn't catch issues like incorrect algorithm implementation where the code runs but produces wrong results. What matters more than coverage percentage is whether your tests validate critical functionality, catch common bugs, and test realistic scenarios and edge cases.
 
 ### Question 9
 
@@ -247,7 +249,7 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 9 fill here ---
+We made extensive use of branches and pull requests throughout the project. Each team member created separate feature branches when working on specific tasks like implementing the API, setting up Docker containers, configuring CI/CD, or adding new model functionality. This approach prevented us from accidentally breaking the main branch with experimental or incomplete code. When a feature was complete and tested locally, we created a pull request to merge it into main. This gave other team members a chance to review the code, catch potential issues, and ensure everything integrated properly before merging. The PR workflow also helped us maintain a clean commit history and made it easy to track what changes were made for each feature. By keeping main stable and functional, we could always fall back to a working version if something went wrong on a feature branch. This branching strategy is essential for team collaboration and prevents the chaos of everyone pushing directly to main.
 
 ### Question 10
 
@@ -262,7 +264,7 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 10 fill here ---
+We used DVC to manage our processed datasets and trained models, storing them in Google Cloud Storage buckets. For our project, the main benefit was keeping large data files out of Git while still tracking them. Team members could clone the repo and simply run `uv run dvc pull` to download the data, which was way cleaner than sharing files manually or committing gigabytes to Git. Honestly, since our dataset was fairly static and we didn't do many preprocessing changes, DVC didn't make a huge difference for us day-to-day. However, DVC becomes really valuable in scenarios where you're frequently updating datasets, trying different preprocessing pipelines, or comparing model performance across different data versions. For example, if you discover data quality issues and need to rollback to a previous version, DVC lets you check out specific data versions just like Git commits. It's also crucial when running experiments with different data augmentation strategies or when your training data evolves over time and you need to track which model was trained on which dataset version.
 
 ### Question 11
 
