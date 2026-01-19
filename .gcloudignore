@@ -1,5 +1,10 @@
 .venv/
 .git/
-# data/ is needed by the training dockerfile
-# models/ is needed by the api dockerfile
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
 
+# Keep data and models for the build context
+# data/
+# models/
