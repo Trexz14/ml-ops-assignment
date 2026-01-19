@@ -64,7 +64,7 @@ def docker_evaluate(ctx: Context, checkpoint: str = "models/model_final.pt", spl
 
     # Run evaluation in Docker container
     ctx.run(
-        f"docker run --rm -v $(pwd)/models:/app/models -v $(pwd)/data:/app/data evaluate:latest {checkpoint} {split}",
+        f'docker run --rm -v "$(pwd)/models":/app/models -v "$(pwd)/data":/app/data evaluate:latest {checkpoint} {split}',
         echo=True,
         pty=not WINDOWS,
     )
