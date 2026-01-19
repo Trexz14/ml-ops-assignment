@@ -1,4 +1,5 @@
 .venv/
 .git/
-data/
+# data/ is needed by the training dockerfile
+# models/ is needed by the api dockerfile
 
