@@ -1,58 +1,65 @@
 # Intel Mac Quick Reference
 
-Quick commands for Intel Mac users running this project with Docker.
+**Fast command reference for Intel Mac users**
+
+See [INTEL_MAC_GUIDE.md](INTEL_MAC_GUIDE.md) for detailed explanations.
 
 ## Prerequisites
-- Docker Desktop installed and running
-- Data downloaded: Run `dvc pull` (may need to install dvc with pip if uv fails)
-- Google Cloud authenticated: `gcloud auth application-default login`
+
+- ✅ Docker Desktop installed and running
+- ✅ Data downloaded: `pip install dvc dvc-gs && dvc pull`
+- ✅ Dependencies installed: `uv sync`
 
 ## One-Time Setup
 
 ```bash
-# Build Docker images (takes 2-3 minutes first time)
-docker build -t evaluate:latest . -f dockerfiles/evaluate.dockerfile
-docker build -t train:latest . -f dockerfiles/train.dockerfile
-docker build -t api:latest . -f dockerfiles/api.dockerfile
+# Install dependencies (PyTorch skipped on Intel Mac)
+uv sync
 
-# Or build all at once (if you can use invoke without torch)
+# Download data and models
+dvc pull
+
+# Build Docker images (optional - auto-builds when needed)
 uv run invoke docker-build
 ```
 
+⏱️ First build: 10-30 minutes. Subsequent builds: fast (cached).
+
 ## Common Commands
 
-### Evaluate Model
+### Evaluate Models
 
 ```bash
-# Test set
+# Test set (easiest way)
+uv run invoke docker-evaluate --checkpoint models/model_final.pt
+
+# Validation set
+uv run invoke docker-evaluate --checkpoint models/model_final.pt --split validation
+
+# Different checkpoint
+uv run invoke docker-evaluate --checkpoint models/model_epoch_5.pt
+```
+
+**Or with direct Docker:**
+```bash
 docker run --rm \
   -v $(pwd)/models:/app/models \
   -v $(pwd)/data:/app/data \
   evaluate:latest models/model_final.pt test
-
-# Validation set (if exists)
-docker run --rm \
-  -v $(pwd)/models:/app/models \
-  -v $(pwd)/data:/app/data \
-  evaluate:latest models/model_final.pt validation
-
-# Different checkpoint
-docker run --rm \
-  -v $(pwd)/models:/app/models \
-  -v $(pwd)/data:/app/data \
-  evaluate:latest models/model_epoch_10.pt test
 ```
 
-### Train Model
+### Train Models
 
 ```bash
-# Preprocess data first (if needed)
-docker run --rm \
-  --entrypoint uv \
-  -v $(pwd)/data:/app/data \
-  train:latest run python src/ml_ops_assignment/data.py process
+# Easiest way (uses configs/exp1.yaml)
+uv run invoke docker-train
 
-# Train model
+# After training, evaluate the new model
+uv run invoke docker-evaluate --checkpoint models/model_epoch_10.pt
+```
+
+**Or with direct Docker:**
+```bash
 docker run --rm \
   -v $(pwd)/models:/app/models \
   -v $(pwd)/data:/app/data \
@@ -60,51 +67,80 @@ docker run --rm \
   train:latest
 ```
 
-### Run API
+**To train with different parameters:**
+1. Edit `configs/exp1.yaml` (or create new config)
+2. Run `uv run invoke docker-train`
+
+### Run API Server
 
 ```bash
 docker run --rm \
   -p 8000:8000 \
   -v $(pwd)/models:/app/models \
   api:latest
+```
 
-# Access at: http://localhost:8000/docs
+Access at: **http://localhost:8000/docs**
+
+### Format & Lint Code
+
+```bash
+# These work directly (no Docker needed)
+uv run ruff format .
+uv run ruff check . --fix
+uv run pre-commit run --all-files
 ```
 
 ## Troubleshooting
 
 ### Docker not running
-**Error:** `Cannot connect to the Docker daemon`
+**Error:** `Cannot connect to the Docker daemon`  
 **Fix:** Start Docker Desktop application
 
+---
+
 ### Image not found
-**Error:** `Unable to find image 'evaluate:latest' locally`
-**Fix:** Build the image first:
+**Error:** `Unable to find image 'evaluate:latest'`  
+**Fix:** Images build automatically, but you can manually build:
 ```bash
-docker build -t evaluate:latest . -f dockerfiles/evaluate.dockerfile
+uv run invoke docker-build
 ```
 
+---
+
 ### Models not found
-**Error:** `FileNotFoundError: models/model_final.pt`
+**Error:** `FileNotFoundError: models/model_final.pt`  
 **Fix:** Download models:
 ```bash
-# Install dvc if needed
 pip install dvc dvc-gs
-
-# Download models and data
 dvc pull
 ```
 
-### Permission denied
-**Fix:** On Linux, you may need to add your user to the docker group:
+---
+
+### Clean up Docker
 ```bash
-sudo usermod -aG docker $USER
-# Then log out and back in
+# Remove unused images/containers
+docker system prune -a
+
+# Remove specific image
+docker rmi evaluate:latest
 ```
 
-## Advanced
+## What Works ✅
 
-### Interactive Shell in Container
+| Command | Works? | Notes |
+|---------|--------|-------|
+| `uv sync` | ✅ Yes | Installs everything except PyTorch |
+| `uv run invoke docker-evaluate` | ✅ Yes | Auto-builds if needed |
+| `uv run invoke docker-train` | ✅ Yes | Auto-builds if needed |
+| `uv run ruff format .` | ✅ Yes | No Docker needed |
+| `uv run invoke evaluate` | ❌ No | Use `docker-evaluate` instead |
+| `uv run invoke train` | ❌ No | Use `docker-train` instead |
+
+## Advanced Commands
+
+### Interactive shell in container
 ```bash
 docker run --rm -it \
   -v $(pwd):/app \
@@ -112,7 +148,7 @@ docker run --rm -it \
   evaluate:latest
 ```
 
-### Run Tests
+### Run tests
 ```bash
 docker run --rm \
   -v $(pwd):/app \
@@ -121,25 +157,28 @@ docker run --rm \
   uv run pytest tests/ -v
 ```
 
-### Clean Up Docker
+### List available tasks
 ```bash
-# Remove unused images and containers
-docker system prune -a
-
-# Remove specific image
-docker rmi evaluate:latest
-
-# List all images
-docker images
+uv run invoke --list
 ```
+
+## Quick Workflow
+
+**For new Intel Mac users:**
+1. `uv sync` - Install dependencies
+2. `dvc pull` - Download data/models
+3. `uv run invoke docker-evaluate --checkpoint models/model_final.pt` - Run evaluation (auto-builds image)
+
+**To experiment with training:**
+1. Edit `configs/exp1.yaml` with your parameters
+2. `uv run invoke docker-train` - Train model
+3. `uv run invoke docker-evaluate --checkpoint models/model_epoch_10.pt` - Evaluate results
 
 ## Notes
 
-- Volume mounts (`-v`) map your local files into the container
-- `--rm` automatically removes container after it exits
-- `-p 8000:8000` maps container port 8000 to your machine's port 8000
-- All data/models stay on your machine (not in the container)
+- **Auto-build:** First time you run `docker-train` or `docker-evaluate`, images build automatically
+- **Volume mounts** (`-v`) let Docker access your local files
+- **Models persist:** All models/data stay on your Mac between runs
+- **Fast iteration:** After first build, everything runs quickly
 
-## Full Documentation
-
-For complete details, see [INTEL_MAC_GUIDE.md](INTEL_MAC_GUIDE.md)
+**See [INTEL_MAC_GUIDE.md](INTEL_MAC_GUIDE.md) for complete documentation.**

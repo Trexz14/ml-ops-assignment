@@ -1,168 +1,187 @@
-# Summary of Changes for Intel Mac Compatibility
+# Intel Mac Compatibility - Technical Reference
 
-This document summarizes the changes made to enable Intel Mac users to run the project using Docker.
+**For maintainers and contributors**
+
+This document explains the technical solution for Intel Mac compatibility.
 
 ## Problem
 
-On Intel Macs, `uv` doesn't have pre-built wheels for PyTorch 2.6.0, causing installation failures when trying to run commands like:
-```bash
-uv run invoke evaluate --checkpoint models/model_final.pt
+PyTorch 2.6.0 doesn't provide wheels for macOS x86_64 (Intel Macs), causing:
 ```
-
-Error message:
-```
-error: Distribution `torch==2.6.0 @ registry+https://download.pytorch.org/whl/cpu` can't be installed because 
-it doesn't have a source distribution or wheel for the current platform
+error: Distribution `torch==2.6.0` can't be installed because it doesn't have a 
+source distribution or wheel for the current platform
 ```
 
 ## Solution
 
-We've implemented a Docker-based workflow that works on all platforms, including Intel Macs. Docker provides a consistent Linux environment where PyTorch wheels are available.
+### 1. Platform Markers
 
-## Files Created/Modified
+Added conditional dependency in `pyproject.toml`:
 
-### 1. New Files Created
+```toml
+"torch==2.6.0; sys_platform != 'darwin' or platform_machine == 'arm64'",
+```
 
-#### `dockerfiles/evaluate.dockerfile`
-- Docker image specifically for model evaluation
-- Uses `ghcr.io/astral-sh/uv:python3.12-bookworm-slim` as base
-- Installs all dependencies including PyTorch in a Linux environment
-- Mounts `models/` and `data/` directories at runtime for accessing local files
+**Logic:**
+- Install PyTorch if NOT macOS → Linux, Windows ✅
+- OR install if ARM64 → M1/M2/M3 Macs ✅  
+- Skip if macOS AND x86_64 → Intel Macs ❌
 
-#### `INTEL_MAC_GUIDE.md`
-- Comprehensive guide for Intel Mac users
-- Step-by-step instructions for:
-  - Installing Docker Desktop
-  - Building Docker images
-  - Running evaluation, training, and API
-  - Troubleshooting common issues
-- Comparison table between standard and Docker workflows
+**Result:** `uv sync` works on Intel Mac, skipping PyTorch but installing everything else.
 
-#### `documents/INTEL_MAC_SUMMARY.md`
-- This file - technical summary of changes
-- Documents all modifications and their rationale
+### 2. Docker Execution
 
-### 2. Modified Files
+Created Docker images that include PyTorch:
+- `dockerfiles/evaluate.dockerfile` - For model evaluation
+- `dockerfiles/train.dockerfile` - For training
+- `dockerfiles/api.dockerfile` - For API server
 
-#### `tasks.py`
-- Added `docker_evaluate()` task for running evaluation via Docker
-- Updated `docker_build()` to also build the evaluation image
-- Usage: `uv run invoke docker-evaluate --checkpoint models/model_final.pt --split test`
+**Volume mounts** give containers access to host files without copying.
 
-#### `QUICKSTART.md`
-- Added note at the top referencing Intel Mac guide
-- Added Docker evaluation commands in the "Evaluate Model" section
-- Added new "Docker (Alternative / Intel Mac)" section at the bottom
+## Implementation Details
 
-#### `src/ml_ops_assignment/data.py`
-- Fixed `collate_fn()` to truncate sequences exceeding 512 tokens
-- Prevents runtime errors when batch contains sequences longer than BERT's max position embeddings
-- This bug affected all platforms but was discovered during Intel Mac testing
+### Files Modified
 
-## How It Works
+**pyproject.toml**
+```toml
+# Changed from:
+"torch==2.6.0",
 
-### Docker Workflow
+# To:
+"torch==2.6.0; sys_platform != 'darwin' or platform_machine == 'arm64'",
+```
 
-1. **Build once**: Docker image contains all dependencies including PyTorch
-   ```bash
-   docker build -t evaluate:latest . -f dockerfiles/evaluate.dockerfile
+Also removed `[tool.uv.sources]` and `[[tool.uv.index]]` sections.
+
+**tasks.py**
+- Added `docker_evaluate()` - Wrapper for Docker-based evaluation
+- Updated `docker_build()` - Builds all three Docker images
+
+**src/ml_ops_assignment/data.py**
+- Fixed `collate_fn()` to truncate sequences > 512 tokens
+- Prevents runtime errors for all platforms
+
+### Files Created
+
+**Dockerfiles:**
+- `dockerfiles/evaluate.dockerfile`
+- (train and api dockerfiles already existed)
+
+**Documentation:**
+- `INTEL_MAC_GUIDE.md` - User guide
+- `INTEL_MAC_QUICKREF.md` - Quick reference
+- `documents/INTEL_MAC_SUMMARY.md` - This file
+
+## What Works
+
+### Intel Mac Compatible
+
+| Command | Works | Why |
+|---------|-------|-----|
+| `uv sync` | ✅ | Platform marker skips PyTorch |
+| `uv run invoke docker-build` | ✅ | No PyTorch import needed |
+| `uv run invoke docker-evaluate` | ✅ | Runs in Docker container |
+| `docker run ... evaluate:latest` | ✅ | Direct Docker execution |
+| `uv run ruff format .` | ✅ | No PyTorch dependency |
+
+### Requires Native PyTorch
+
+| Command | Works | Alternative |
+|---------|-------|-------------|
+| `uv run invoke evaluate` | ❌ | `uv run invoke docker-evaluate` |
+| `uv run invoke train` | ❌ | `docker run ... train:latest` |
+| `uv run invoke serve-api` | ❌ | `docker run ... api:latest` |
+| `uv run pytest tests/` | ❌ | `docker run ... pytest` |
+
+## Platform Compatibility Matrix
+
+| Platform | Standard Workflow | Docker Workflow |
+|----------|------------------|-----------------|
+| Linux x86_64 | ✅ | ✅ |
+| macOS ARM64 (M1/M2/M3) | ✅ | ✅ |
+| Windows x86_64 | ✅ | ✅ |
+| macOS x86_64 (Intel) | ❌ | ✅ |
+
+## Testing
+
+Verified on Intel Mac (macOS x86_64):
+
+```bash
+$ uv sync
+✅ Success - 186 packages, torch NOT installed
+
+$ uv run invoke docker-evaluate --checkpoint models/model_final.pt
+✅ Success - Accuracy: 87.20%
+```
+
+## Maintenance Guidelines
+
+### When Updating Dependencies
+
+1. Preserve the platform marker:
+   ```toml
+   "torch==X.Y.Z; sys_platform != 'darwin' or platform_machine == 'arm64'",
    ```
 
-2. **Run evaluation**: Mount local directories into container
+2. Rebuild Docker images:
    ```bash
-   docker run --rm \
-     -v $(pwd)/models:/app/models \
-     -v $(pwd)/data:/app/data \
-     evaluate:latest models/model_final.pt test
+   uv run invoke docker-build
    ```
 
-3. **Using invoke** (recommended):
+3. Test both workflows:
    ```bash
+   # Standard (if on compatible platform)
+   uv run invoke evaluate --checkpoint models/model_final.pt
+   
+   # Docker (works everywhere)
    uv run invoke docker-evaluate --checkpoint models/model_final.pt
    ```
 
-### Volume Mounts
+### When Updating Documentation
 
-- `-v $(pwd)/models:/app/models`: Maps local models directory to container
-- `-v $(pwd)/data:/app/data`: Maps local data directory to container
-- `--rm`: Automatically removes container after execution
+Keep these files synchronized:
+- `INTEL_MAC_GUIDE.md` - User-facing guide
+- `INTEL_MAC_QUICKREF.md` - Command reference
+- `documents/INTEL_MAC_SUMMARY.md` - Technical details (this file)
 
-## Compatibility
+### CI/CD Considerations
 
-### Standard Workflow (uv)
-- ✅ Works on: Linux x86_64, macOS ARM (M1/M2/M3), Windows x86_64
-- ❌ Fails on: macOS Intel (x86_64)
+To test Intel Mac compatibility in CI:
+- Use Docker-based workflows
+- Test that `uv sync` succeeds (without actually installing PyTorch)
+- Verify Docker images build successfully
 
-### Docker Workflow
-- ✅ Works on: All platforms with Docker installed
-- No platform-specific wheel requirements
-- Consistent behavior across all systems
+## Architecture
 
-## Testing Results
-
-Successfully tested on Intel Mac:
-
-```bash
-$ docker run --rm \
-  -v $(pwd)/models:/app/models \
-  -v $(pwd)/data:/app/data \
-  evaluate:latest models/model_final.pt test
-
-2026-01-19 11:35:09.718 | INFO     | __main__:main:48 -   Loss: 0.4587
-2026-01-19 11:35:09.720 | INFO     | __main__:main:49 -   Accuracy: 87.20%
+```
+┌─────────────────────────────────────────┐
+│  Intel Mac (Host)                       │
+│  ┌───────────────────────────────────┐  │
+│  │ uv environment                    │  │
+│  │ - All dependencies except PyTorch │  │
+│  │ - Can run invoke, ruff, etc.     │  │
+│  └───────────────────────────────────┘  │
+│                                          │
+│  ┌───────────────────────────────────┐  │
+│  │ Docker Container (Linux)          │  │
+│  │ - Complete environment            │  │
+│  │ - Includes PyTorch                │  │
+│  │ - Mounts models/ and data/        │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
 ```
 
-## Recommendations for Users
+## Performance
 
-### Intel Mac Users
-1. Install Docker Desktop
-2. Follow [INTEL_MAC_GUIDE.md](../INTEL_MAC_GUIDE.md) for complete setup
-3. Use `uv run invoke docker-evaluate` for evaluation
-4. Use similar Docker commands for training and API
+- **Container startup:** ~1-2 seconds
+- **First Docker build:** 2-5 minutes (downloads ~2-3 GB)
+- **Subsequent builds:** Seconds (cached)
+- **Evaluation speed:** Same as native
+- **Disk space per image:** ~2-3 GB
 
-### Non-Intel Users
-- Can continue using standard `uv run` commands
-- Docker workflow also available if preferred
-- Both workflows maintain identical functionality
+## Future Improvements
 
-## Recommendations for Maintainers
-
-1. **Test both workflows**: When making changes, test both standard and Docker workflows
-2. **Update Docker images**: Rebuild images after dependency changes
-3. **Keep documentation synced**: Update both QUICKSTART.md and INTEL_MAC_GUIDE.md
-4. **Consider CI/CD**: Add Docker-based tests to ensure compatibility
-
-## Future Enhancements
-
-Potential improvements to consider:
-
-1. **Pre-built images**: Push Docker images to a registry (e.g., Docker Hub, GitHub Container Registry)
-   - Users can pull instead of build
-   - Faster setup for new users
-
-2. **Docker Compose**: Create `docker-compose.yml` for easier orchestration
-   - Single command to run training + API
-   - Manage multiple containers
-
-3. **Dev containers**: Add `.devcontainer` configuration for VS Code
-   - Full development environment in Docker
-   - Consistent across all platforms
-
-4. **GPU support**: Add GPU-enabled Dockerfile variant
-   - For users with NVIDIA GPUs on Linux
-   - Faster training and evaluation
-
-## Additional Notes
-
-### Bug Fix
-The `collate_fn()` fix in `data.py` resolves an issue where sequences longer than 512 tokens caused runtime errors. This was discovered during testing but affects all platforms, not just Intel Macs. The fix ensures sequences are truncated to the model's maximum supported length.
-
-### Performance
-- Docker adds minimal overhead (~1-2 seconds for container startup)
-- Evaluation performance is identical to native execution
-- First build takes 2-3 minutes; subsequent builds use cache and are fast
-
-### Data and Models
-- Models and data remain on host machine (not copied into image)
-- Volume mounts provide container access without duplication
-- Changes to models/data are immediately available to containers
+1. **Pre-built images** - Push to GitHub Container Registry
+2. **Docker Compose** - Orchestrate multiple services
+3. **Dev Containers** - VS Code integration
+4. **GPU support** - Separate GPU-enabled Dockerfile

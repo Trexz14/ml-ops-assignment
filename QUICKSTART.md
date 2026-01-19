@@ -38,10 +38,7 @@ uv run invoke evaluate --checkpoint models/model_epoch_10.pt
 
 **Intel Mac Users (Docker):**
 ```bash
-# Build Docker image (first time only)
-uv run invoke docker-build
-
-# Test set (default)
+# Test set (auto-builds image if needed)
 uv run invoke docker-evaluate --checkpoint models/model_final.pt
 
 # Validation set
@@ -55,6 +52,12 @@ uv run invoke preprocess-data
 
 # Train model
 uv run invoke train
+```
+
+**Intel Mac Users (Docker):**
+```bash
+# Train model (auto-builds image if needed)
+uv run invoke docker-train
 ```
 
 ## Inference API

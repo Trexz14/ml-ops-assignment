@@ -70,6 +70,24 @@ def docker_evaluate(ctx: Context, checkpoint: str = "models/model_final.pt", spl
     )
 
 
+@task
+def docker_train(ctx: Context, config: str = "configs/exp1.yaml") -> None:
+    """Train model using Docker (useful for Intel Mac users)."""
+    # Ensure we have the train Docker image
+    result = ctx.run("docker images -q train:latest", hide=True, warn=True)
+    if not result or not result.stdout.strip():
+        print("Docker image 'train:latest' not found. Building it now...")
+        docker_build(ctx)
+
+    # Run training in Docker container
+    ctx.run(
+        f"docker run --rm -v $(pwd)/models:/app/models -v $(pwd)/data:/app/data -v $(pwd)/configs:/app/configs train:latest",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+
 # Documentation commands
 @task
 def build_docs(ctx: Context) -> None:
