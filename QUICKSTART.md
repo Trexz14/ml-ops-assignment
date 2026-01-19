@@ -1,5 +1,7 @@
 # Quick Start
 
+> **Note for Intel Mac Users:** If you're using an Intel Mac and encounter PyTorch installation issues with `uv`, see [INTEL_MAC_GUIDE.md](INTEL_MAC_GUIDE.md) for Docker-based instructions.
+
 ## Setup
 ```bash
 # Clone repo
@@ -32,6 +34,18 @@ uv run invoke evaluate --checkpoint models/model_final.pt --split validation
 
 # Specific checkpoint
 uv run invoke evaluate --checkpoint models/model_epoch_10.pt
+```
+
+**Intel Mac Users (Docker):**
+```bash
+# Build Docker image (first time only)
+uv run invoke docker-build
+
+# Test set (default)
+uv run invoke docker-evaluate --checkpoint models/model_final.pt
+
+# Validation set
+uv run invoke docker-evaluate --checkpoint models/model_final.pt --split validation
 ```
 
 ## Train New Model
@@ -77,4 +91,20 @@ uv run pre-commit run --all-files
 ```bash
 # Push to DVC remote
 gsutil -m rsync -r .dvc/cache gs://mlops-dtu-data/dvc-cache/
+```
+
+## Docker (Alternative / Intel Mac)
+```bash
+# Build all Docker images
+uv run invoke docker-build
+
+# Or build individually
+docker build -t train:latest . -f dockerfiles/train.dockerfile
+docker build -t api:latest . -f dockerfiles/api.dockerfile
+docker build -t evaluate:latest . -f dockerfiles/evaluate.dockerfile
+
+# Run evaluation via Docker
+uv run invoke docker-evaluate --checkpoint models/model_final.pt
+
+# See INTEL_MAC_GUIDE.md for complete Docker workflow
 ```
