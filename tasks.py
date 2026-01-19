@@ -87,8 +87,6 @@ def docker_train(ctx: Context, config: str = "configs/exp1.yaml") -> None:
     )
 
 
-
-
 # Documentation commands
 @task
 def build_docs(ctx: Context) -> None:
