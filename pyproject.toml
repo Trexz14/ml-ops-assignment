@@ -47,6 +47,7 @@ dev = [
     "dvc-gdrive>=3.0.1",
     "dvc-gs>=3.0.2",
     "pytest-cov>=6.3.0",
+    "types-pyyaml>=6.0.12.20250915",
 ]
 
 
@@ -70,6 +71,10 @@ line-length = 120
 pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = "-v"
+
+[tool.mypy]
+files = ["src", "tests", "tasks.py"]
+ignore_missing_imports = true
 
 [tool.coverage.run]
 omit = ["tests/*"]

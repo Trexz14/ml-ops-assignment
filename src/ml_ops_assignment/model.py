@@ -310,7 +310,7 @@ def train(
     gradient_clip = training_config["gradient_clip"]
 
     print(f"\nStarting training for {num_epochs} epochs...")
-    if do_validation:
+    if do_validation and val_loader is not None:
         print(f"Training batches: {len(train_loader)}, Validation batches: {len(val_loader)}")
     else:
         print(f"Training batches: {len(train_loader)}, Validation disabled")

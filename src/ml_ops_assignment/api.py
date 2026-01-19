@@ -7,10 +7,11 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import AutoTokenizer
 
-from ml_ops_assignment.model import load_model, load_config
+from typing import Any
+from ml_ops_assignment.model import load_model, load_config, TextClassificationModel
 
 # Dictionary to store model and tokenizer
-model_assets = {}
+model_assets: dict[str, Any] = {}
 
 
 class PredictRequest(BaseModel):
@@ -102,6 +103,10 @@ async def predict(request: PredictRequest):
     config = model_assets.get("config")
     max_length = config["model"].get("max_length", 512) if config else 512
 
+    # Help mypy understand types
+    assert tokenizer is not None
+    assert model is not None
+
     inputs = tokenizer(
         request.text,
         return_tensors="pt",
@@ -117,7 +122,7 @@ async def predict(request: PredictRequest):
     # Predict
     with torch.no_grad():
         logits = model(input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"])
-        prediction = torch.argmax(logits, dim=-1).item()
+        prediction = int(torch.argmax(logits, dim=-1).item())
 
     # Domain mapping (0: Elementary, 1: Intermediate, 2: Advance)
     class_names = ["Elementary", "Intermediate", "Advance"]
