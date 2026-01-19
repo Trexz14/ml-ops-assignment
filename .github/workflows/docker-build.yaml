@@ -10,7 +10,8 @@ on:
       - 'src/**'          
       - 'dockerfiles/**'  
       - 'pyproject.toml'  
-      - 'cloudbuild.yaml' 
+      - 'cloudbuild.yaml'
+      - '.gcloudignore'
   workflow_dispatch:      # Allows us to run it manually from the "Actions" tab
 
 jobs:
