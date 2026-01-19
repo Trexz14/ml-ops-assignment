@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from transformers import AutoTokenizer
 
 from typing import Any
-from ml_ops_assignment.model import load_model, load_config, TextClassificationModel
+from ml_ops_assignment.model import TextClassificationModel, load_config, load_model
 
 # Dictionary to store model and tokenizer
 model_assets: dict[str, Any] = {}
@@ -87,7 +87,7 @@ async def predict(request: PredictRequest):
     """
     Predict the class of the input text.
     """
-    model = model_assets.get("model")
+    model: TextClassificationModel | None = model_assets.get("model")
     tokenizer = model_assets.get("tokenizer")
 
     if model is None or tokenizer is None:
