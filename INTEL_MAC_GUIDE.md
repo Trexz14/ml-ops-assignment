@@ -95,6 +95,15 @@ docker run --rm \
   -v $(pwd)/configs:/app/configs \
   train:latest
 ```
+or (recommended)
+``` 
+docker run --rm \
+  -v "$(pwd)/models":/app/models \
+  -v "$(pwd)/data":/app/data \
+  -v "$(pwd)/configs":/app/configs \
+  train:latest --config-path configs/experiments/exp2.yaml
+```
+Where "configs/experiments/exp2.yaml" is the path to the config file you want to train using.
 
 **After training**, evaluate your new model:
 ```bash
