@@ -56,4 +56,3 @@ if __name__ == "__main__":
     checkpoint = sys.argv[1] if len(sys.argv) > 1 else "models/model_final.pt"
     split = sys.argv[2] if len(sys.argv) > 2 else "test"
     main(checkpoint=checkpoint, split=split)
-

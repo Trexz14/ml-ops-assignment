@@ -14,15 +14,15 @@ model_assets = {}
 
 
 class PredictRequest(BaseModel):
-    text: str # What we expect input to be 
+    text: str  # What we expect input to be
 
 
 class PredictResponse(BaseModel):
     # expected types of output
-    text: str # inputtet text
-    label: int # predicted label
-    class_name: str # predicted class name
-    status_code: int # HTTP status code
+    text: str  # inputtet text
+    label: int  # predicted label
+    class_name: str  # predicted class name
+    status_code: int  # HTTP status code
 
 
 @asynccontextmanager
@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     model_assets["config"] = config
 
     print(f"Loading model from {checkpoint_path}...")
-    
+
     # Check if checkpoint exists, otherwise load dummy for initial development/testing
     if checkpoint_path.exists():
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -62,7 +62,6 @@ async def lifespan(app: FastAPI):
     yield
     # Cleanup
     model_assets.clear()
-
 
 
 app = FastAPI(
@@ -111,24 +110,18 @@ async def predict(request: PredictRequest):
         padding="max_length",
     )
 
-    
     # Move to same device as model
     device = next(model.parameters()).device
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
     # Predict
     with torch.no_grad():
-        logits = model(
-            input_ids=inputs["input_ids"],
-            attention_mask=inputs["attention_mask"]
-        )
+        logits = model(input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"])
         prediction = torch.argmax(logits, dim=-1).item()
-
-
 
     # Domain mapping (0: Elementary, 1: Intermediate, 2: Advance)
     class_names = ["Elementary", "Intermediate", "Advance"]
-    
+
     return PredictResponse(
         text=request.text,
         label=prediction,

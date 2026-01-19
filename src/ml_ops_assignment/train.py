@@ -5,17 +5,16 @@ This script provides a simple command-line interface to train the model
 using the configuration file. It imports and uses the train function from model.py.
 """
 
-from dotenv import load_dotenv
-load_dotenv()
-
-import os 
-import wandb
-
+import os
 from pathlib import Path
 
 import typer
+import wandb
+from dotenv import load_dotenv
 
 from ml_ops_assignment.model import train
+
+load_dotenv()
 
 app = typer.Typer()
 
