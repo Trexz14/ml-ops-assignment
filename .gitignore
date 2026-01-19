@@ -188,6 +188,9 @@ models/
 # Hydra outputs (if using Hydra)
 outputs/
 multirun/
-# Logging 
+
+# Logging
+logs/
+*.log
 .env
 /models

@@ -9,6 +9,9 @@ from transformers import AutoTokenizer
 
 from typing import Any
 from ml_ops_assignment.model import TextClassificationModel, load_config, load_model
+from ml_ops_assignment.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 # Dictionary to store model and tokenizer
 model_assets: dict[str, Any] = {}
@@ -32,9 +35,16 @@ async def lifespan(app: FastAPI):
     Lifespan context manager for the FastAPI application.
     Loads the model and tokenizer on startup and cleans up on shutdown.
     """
+    logger.info("=" * 60)
+    logger.info("FastAPI Application Starting Up")
+    logger.info("=" * 60)
+
     # Define paths
     checkpoint_path = Path("models/model_final.pt")
     config_path = Path("configs/experiments/default.yaml")
+
+    logger.info(f"Checkpoint path: {checkpoint_path}")
+    logger.info(f"Config path: {config_path}")
 
     # Load configuration
     config = load_config(config_path)
@@ -44,25 +54,37 @@ async def lifespan(app: FastAPI):
 
     # Check if checkpoint exists, otherwise load dummy for initial development/testing
     if checkpoint_path.exists():
+        logger.info(f"Checkpoint found at {checkpoint_path}")
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        logger.info(f"Using device: {device}")
         model = load_model(checkpoint_path, config_path=config_path, device=device)
         model_assets["model"] = model
+        logger.success("Model loaded successfully")
     else:
         print(f"WARNING: Checkpoint {checkpoint_path} not found. Running in mock mode.")
+        logger.warning(f"Checkpoint {checkpoint_path} not found. API running in mock mode.")
         model_assets["model"] = None
 
     # Load tokenizer from config
     tokenizer_name = config["model"]["model_name"]
     print(f"Loading tokenizer {tokenizer_name}...")
+    logger.info(f"Loading tokenizer: {tokenizer_name}")
     try:
         model_assets["tokenizer"] = AutoTokenizer.from_pretrained(tokenizer_name)
+        logger.success("Tokenizer loaded successfully")
     except Exception as e:
         print(f"WARNING: Failed to load tokenizer {tokenizer_name}: {e}")
+        logger.error(f"Failed to load tokenizer {tokenizer_name}: {e}")
         model_assets["tokenizer"] = None
 
+    logger.success("Application startup complete")
+
     yield
+
     # Cleanup
+    logger.info("Shutting down application...")
     model_assets.clear()
+    logger.success("Application shutdown complete")
 
 
 app = FastAPI(
@@ -76,6 +98,7 @@ app = FastAPI(
 @app.get("/")
 def root():
     """Health check endpoint."""
+    logger.debug("Health check endpoint called")
     return {
         "message": HTTPStatus.OK.phrase,
         "status-code": HTTPStatus.OK,
@@ -87,11 +110,14 @@ async def predict(request: PredictRequest):
     """
     Predict the class of the input text.
     """
+    logger.info(f"Prediction request received for text: '{request.text[:50]}...'")
+
     model: TextClassificationModel | None = model_assets.get("model")
     tokenizer = model_assets.get("tokenizer")
 
     if model is None or tokenizer is None:
         # Mock prediction for development/testing when assets are missing
+        logger.warning("Mock prediction mode - model or tokenizer not available")
         return PredictResponse(
             text=request.text,
             label=0,
@@ -107,6 +133,7 @@ async def predict(request: PredictRequest):
     assert tokenizer is not None
     assert model is not None
 
+    logger.debug(f"Tokenizing input with max_length={max_length}")
     inputs = tokenizer(
         request.text,
         return_tensors="pt",
@@ -120,12 +147,15 @@ async def predict(request: PredictRequest):
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
     # Predict
+    logger.debug("Running model inference")
     with torch.no_grad():
         logits = model(input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"])
         prediction = int(torch.argmax(logits, dim=-1).item())
 
     # Domain mapping (0: Elementary, 1: Intermediate, 2: Advance)
     class_names = ["Elementary", "Intermediate", "Advance"]
+
+    logger.info(f"Prediction complete: label={prediction}, class_name={class_names[prediction]}")
 
     return PredictResponse(
         text=request.text,

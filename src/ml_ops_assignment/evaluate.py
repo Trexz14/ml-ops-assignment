@@ -7,10 +7,11 @@ Usage: uv run python src/ml_ops_assignment/evaluate.py models/best_model.pt
 
 from pathlib import Path
 
-from loguru import logger
-
 from ml_ops_assignment.data import get_dataloaders
 from ml_ops_assignment.model import evaluate, get_loss_function, load_config, load_model
+from ml_ops_assignment.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def main(
@@ -20,6 +21,14 @@ def main(
     split: str = "test",
 ) -> None:
     """Evaluate a trained model on the specified data split."""
+    logger.info("=" * 60)
+    logger.info("Evaluation Script Started")
+    logger.info(f"Checkpoint: {checkpoint}")
+    logger.info(f"Data path: {data_path}")
+    logger.info(f"Batch size: {batch_size}")
+    logger.info(f"Split: {split}")
+    logger.info("=" * 60)
+
     checkpoint_path = Path(checkpoint)
     logger.info(f"Loading model from {checkpoint_path}")
 
@@ -48,6 +57,7 @@ def main(
     logger.info(f"  Loss: {results['loss']:.4f}")
     logger.info(f"  Accuracy: {results['accuracy']:.2f}%")
     logger.info("=" * 50)
+    logger.success("Evaluation completed successfully")
 
 
 if __name__ == "__main__":
