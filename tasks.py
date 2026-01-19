@@ -81,7 +81,7 @@ def docker_train(ctx: Context, config: str = "configs/exp1.yaml") -> None:
 
     # Run training in Docker container
     ctx.run(
-        f"docker run --rm -v $(pwd)/models:/app/models -v $(pwd)/data:/app/data -v $(pwd)/configs:/app/configs train:latest",
+        "docker run --rm -v $(pwd)/models:/app/models -v $(pwd)/data:/app/data -v $(pwd)/configs:/app/configs train:latest",
         echo=True,
         pty=not WINDOWS,
     )
