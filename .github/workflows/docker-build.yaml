@@ -32,7 +32,15 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      # 4. The "Handshake"
+      # 4. Install uv and pull data (so Cloud Build has the files it needs)
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Pull data & models (DVC)
+        run: |
+          uv run dvc pull
+
+      # 5. The "Handshake"
       # This command sends the current folder to GCP and says "Follow the recipe in cloudbuild.yaml"
       - name: Submit build to GCP
         run: |

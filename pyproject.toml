@@ -26,7 +26,7 @@ dependencies = [
     "markdown>=3.10",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
-    "torch==2.6.0",
+    "torch==2.6.0; sys_platform != 'darwin' or platform_machine == 'arm64'",
     "transformers>=4.57.5",
     "typer==0.12.5",
     "uvicorn==0.34.0",
@@ -51,19 +51,6 @@ dev = [
 ]
 
 
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cpu" },
-]
-torchvision = [
-    { index = "pytorch-cpu" },
-]
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
 [tool.ruff]
 line-length = 120
 
@@ -77,4 +64,11 @@ files = ["src", "tests", "tasks.py"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
+source = ["src"]
 omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]

@@ -45,8 +45,10 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY
+  env:
+    - 'DOCKER_BUILDKIT=1'
 
 # Variables we can change without touching the code above
 substitutions:
   _REGION: 'europe-west1'
-  _REGISTRY_NAME: 'mlops-registry'
+  _REGISTRY_NAME: 'my-docker-repo'

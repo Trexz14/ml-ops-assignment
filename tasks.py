@@ -46,6 +46,45 @@ def docker_build(ctx: Context, progress: str = "plain") -> None:
     ctx.run(
         f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}", echo=True, pty=not WINDOWS
     )
+    ctx.run(
+        f"docker build -t evaluate:latest . -f dockerfiles/evaluate.dockerfile --progress={progress}",
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def docker_evaluate(ctx: Context, checkpoint: str = "models/model_final.pt", split: str = "test") -> None:
+    """Evaluate trained model using Docker (useful for Intel Mac users)."""
+    # Ensure we have the evaluate Docker image
+    result = ctx.run("docker images -q evaluate:latest", hide=True, warn=True)
+    if not result or not result.stdout.strip():
+        print("Docker image 'evaluate:latest' not found. Building it now...")
+        docker_build(ctx)
+
+    # Run evaluation in Docker container
+    ctx.run(
+        f'docker run --rm -v "$(pwd)/models":/app/models -v "$(pwd)/data":/app/data evaluate:latest {checkpoint} {split}',
+        echo=True,
+        pty=not WINDOWS,
+    )
+
+
+@task
+def docker_train(ctx: Context, config: str = "configs/exp1.yaml") -> None:
+    """Train model using Docker (useful for Intel Mac users)."""
+    # Ensure we have the train Docker image
+    result = ctx.run("docker images -q train:latest", hide=True, warn=True)
+    if not result or not result.stdout.strip():
+        print("Docker image 'train:latest' not found. Building it now...")
+        docker_build(ctx)
+
+    # Run training in Docker container
+    ctx.run(
+        "docker run --rm -v $(pwd)/models:/app/models -v $(pwd)/data:/app/data -v $(pwd)/configs:/app/configs train:latest",
+        echo=True,
+        pty=not WINDOWS,
+    )
 
 
 # Documentation commands
