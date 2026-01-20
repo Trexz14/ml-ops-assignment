@@ -147,7 +147,7 @@ s234869, s245176, s244742,
 >
 > Answer:
 
---- question 3 fill here ---
+We used **Hugging Face Transformers** as our primary third-party framework. Specifically, we used `AutoTokenizer` for text tokenization with automatic padding, truncation, and encoding to convert raw text into model-ready tensors. We also used Hugging Face's `datasets` library to load the "SetFit/onestop_english" dataset directly from the Hugging Face Hub. For the model backbone, we used the pre-trained `prajjwal1/bert-mini` model, a lightweight BERT variant with only 11M parameters, making it ideal for rapid iteration during development. The framework saved us significant implementation time since we didn't need to write tokenization logic or attention mechanisms from scratch. We simply called `AutoTokenizer.from_pretrained(model_name)` and the framework handled all the preprocessing complexity. This allowed us to focus on building the MLOps infrastructure rather than spending time on NLP fundamentals.
 
 ## Coding environment
 
@@ -219,7 +219,7 @@ We used Ruff for both linting and formatting since it's faster than traditional 
 >
 > Answer:
 
-We implemented 57 unit tests across three test files: test_data.py, test_model.py, and test_api.py. The data tests verify dataset loading from Hugging Face, batch collation, padding, and DataLoader functionality. Model tests check model initialization, forward pass correctness, output shapes, configuration loading, device handling, and the evaluation function. API tests validate the FastAPI health check endpoint, prediction endpoint functionality with various inputs including edge cases, and error handling for invalid requests. These tests ensure the critical components of our pipeline work correctly before deployment. 
+We implemented 60 unit tests across three test files: test_data.py, test_model.py, and test_api.py. The data tests verify dataset loading from Hugging Face, batch collation, padding, and DataLoader functionality. Model tests check model initialization, forward pass correctness, output shapes, configuration loading, device handling, and the evaluation function. API tests validate the FastAPI health check endpoint, prediction endpoint functionality with various inputs including edge cases, and error handling for invalid requests. These tests ensure the critical components of our pipeline work correctly before deployment. 
 
 ### Question 8
 
@@ -281,7 +281,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 11 fill here ---
+We organized our CI into 4 separate GitHub Actions workflows in `.github/workflows/`. The **tests.yaml** workflow runs our 60 unit tests on every push and pull request to main. It uses a matrix strategy to test across three operating systems (Ubuntu, Windows, macOS) with Python 3.12, ensuring our code works consistently across platforms. The workflow uses `astral-sh/setup-uv@v7` with caching enabled (`enable-cache: true`) which significantly speeds up dependency installation by caching the uv cache directory between runs. On Ubuntu specifically, it authenticates with GCP via service account credentials stored in GitHub Secrets and pulls the processed data using DVC before running pytest with coverage reporting (`uv run coverage run -m pytest tests/`). The **linting.yaml** workflow enforces code quality by running Ruff for both linting (`ruff check .`) and formatting verification (`ruff format . --check`), plus mypy for static type checking to catch type errors before runtime. The **docker-build.yaml** workflow triggers automatically when changes are detected in `src/`, `dockerfiles/`, or `pyproject.toml`, authenticates with GCP, pulls DVC data and models, and submits the build to Google Cloud Build using `gcloud builds submit . --config cloudbuild.yaml`. This builds and pushes our Docker images to Artifact Registry. Finally, **pre-commit-update.yaml** runs weekly to keep our pre-commit hooks updated with the latest versions. Our workflows can be seen here: https://github.com/Trexz14/ml-ops-assignment/actions
 
 ## Running code and tracking experiments
 
@@ -300,7 +300,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 12 fill here ---
+We use YAML configuration files stored in `configs/experiments/`. The default config `default.yaml` contains all hyperparameters organized into sections: `model` (model_name, num_labels, dropout, hidden_size, max_length), `training` (optimizer, learning_rate, batch_size, num_epochs, gradient_clip, data_path), and `device` settings. To run training: `uv run python -m ml_ops_assignment.train --config-path configs/experiments/default.yaml`. The config is loaded via our `load_config()` function that parses the YAML into a dictionary. We also use Typer for CLI arguments, allowing checkpoint resumption: `uv run python -m ml_ops_assignment.train --checkpoint models/model_epoch_5.pt`.
 
 ### Question 13
 
@@ -315,7 +315,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 13 fill here ---
+We secured reproducibility through several mechanisms. First, all hyperparameters are stored in version-controlled YAML config files (`configs/experiments/default.yaml`), so every experiment is fully specified by its config. Second, we set `seed=42` in our data splitting code (`train_test_split(test_size=0.1, seed=42)`) to ensure consistent train/validation/test splits. Third, we use DVC to version our processed data and trained models, storing them in GCP buckets with `.dvc` files tracked in Git. This means anyone can reproduce our exact data state with `dvc pull`. Fourth, our `uv.lock` file pins all dependency versions exactly, eliminating "it works on my machine" issues. Fifth, we integrated Weights & Biases logging which automatically captures hyperparameters, metrics, and system info for each run. To reproduce an experiment: clone the repo, run `uv sync --frozen`, pull data with `dvc pull`, and run training with the same config file.
 
 ### Question 14
 
@@ -347,7 +347,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 15 fill here ---
+We developed three Docker images in `dockerfiles/`: **train.dockerfile** for model training, **api.dockerfile** for serving predictions via FastAPI, and **evaluate.dockerfile** for evaluation. All use the `ghcr.io/astral-sh/uv:python3.12-bookworm-slim` base image with uv for fast dependency installation. We use Docker's layer caching by copying `pyproject.toml` and `uv.lock` first, then running `uv sync --frozen --no-install-project` before copying source code. This means code changes don't invalidate the dependency cache. To build and run the API locally: `docker build -f dockerfiles/api.dockerfile -t api:latest .` then `docker run -p 8000:8000 api:latest`. Our `cloudbuild.yaml` automates building and pushing images to Google Artifact Registry when code changes are pushed to main. The images are tagged as `europe-west1-docker.pkg.dev/$PROJECT_ID/ml-ops-registry/api:latest` and `train:latest`. Link: [train.dockerfile](https://github.com/Trexz14/ml-ops-assignment/blob/main/dockerfiles/train.dockerfile)
 
 ### Question 16
 
@@ -362,7 +362,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 16 fill here ---
+For debugging, we primarily used our structured logging system built with **loguru**. Our `logging_config.py` sets up three log handlers: colored console output for immediate feedback, a rotating `app.log` file (10MB rotation, 7-day retention), and a separate `errors.log` for errors with full tracebacks (`backtrace=True, diagnose=True`). This made debugging production issues much easier since we could grep through logs for specific errors. For interactive debugging, we used VS Code's built-in Python debugger with breakpoints when stepping through complex logic like the model forward pass or data preprocessing pipeline. We also used print statements strategically during development, later converting them to proper logger calls. We did not perform formal profiling with tools like cProfile or PyTorch Profiler, though we did identify that tokenization was our main bottleneck and addressed it by using batched processing (`dataset.map(tokenize_function, batched=True)`).
 
 ## Working in the cloud
 
@@ -379,7 +379,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following GCP services: **Cloud Storage (Buckets)** for storing our processed datasets and trained model checkpoints, linked with DVC for version control (`gs://mlops-dtu-data/dvc-cache`). **Artifact Registry** for storing our Docker images (api:latest, train:latest) pushed via Cloud Build. **Cloud Build** for automated Docker image building, triggered by our GitHub Actions workflow which submits builds using `gcloud builds submit . --config cloudbuild.yaml`. **Cloud Run** for deploying our FastAPI inference service, which automatically scales based on incoming requests and only charges for actual compute time. We authenticated our CI/CD pipeline using a service account key stored in GitHub Secrets (`GCLOUD_SERVICE_KEY`).
 
 ### Question 18
 
@@ -453,7 +453,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 23 fill here ---
+We implemented a FastAPI application in `src/ml_ops_assignment/api.py`. The API has two endpoints: a GET `/` health check returning `{"message": "OK", "status-code": 200}`, and a POST `/predict` endpoint for text classification. We used **Pydantic models** for request/response validation (`PredictRequest` with a `text` field, `PredictResponse` with `text`, `label`, `class_name`, and `status_code`). A key feature is our **lifespan context manager** that loads the model and tokenizer once at startup and stores them in a `model_assets` dictionary, avoiding repeated loading per request. The model predicts text difficulty on a 0-2 scale (Elementary, Intermediate, Advance). We handle the case where the model isn't available by returning mock predictions, which is useful for development and testing. The API includes proper logging at each step and uses `torch.no_grad()` during inference for efficiency. Run locally with: `uv run uvicorn ml_ops_assignment.api:app --reload`
 
 ### Question 24
 
@@ -484,7 +484,7 @@ We used DVC to manage our processed datasets and trained models, storing them in
 >
 > Answer:
 
---- question 25 fill here ---
+For unit testing we used **pytest** with FastAPI's `TestClient`. We have 4 test functions in `tests/test_api.py` that expand to 7 test cases: `test_read_root` verifies the health check endpoint returns 200 OK, `test_predict_endpoint_mock` tests the prediction endpoint returns valid responses with expected fields (text, label, class_name, status_code), and `test_predict_various_inputs` is a parametrized test with 4 different inputs including normal text, negative text, empty strings, and very long text to check edge cases. `test_predict_invalid_input` verifies that missing the required `text` field returns HTTP 422 (Unprocessable Entity). These tests run in our CI pipeline on every push. We did **not** implement formal load testing with tools like Locust or k6, though this would be valuable to determine how many concurrent requests our Cloud Run deployment can handle before latency degrades.
 
 ### Question 26
 
