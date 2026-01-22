@@ -52,45 +52,45 @@ will check the repositories and the code to verify your answers.
 
 ### Week 1
 
-* [ ] Create a git repository (M5)
-* [ ] Make sure that all team members have write access to the GitHub repository (M5)
-* [ ] Create a dedicated environment for you project to keep track of your packages (M2)
-* [ ] Create the initial file structure using cookiecutter with an appropriate template (M6)
-* [ ] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
-* [ ] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [ ] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
+* [✓] Create a git repository (M5)
+* [✓] Make sure that all team members have write access to the GitHub repository (M5)
+* [✓] Create a dedicated environment for you project to keep track of your packages (M2)
+* [✓] Create the initial file structure using cookiecutter with an appropriate template (M6)
+* [✓] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
+* [✓] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
+* [✓] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
     are using (M2+M6)
-* [ ] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [ ] Do a bit of code typing and remember to document essential parts of your code (M7)
-* [ ] Setup version control for your data or part of your data (M8)
+* [✓] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [✓] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [✓] Setup version control for your data or part of your data (M8)
 * [ ] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [ ] Construct one or multiple docker files for your code (M10)
-* [ ] Build the docker files locally and make sure they work as intended (M10)
-* [ ] Write one or multiple configurations files for your experiments (M11)
+* [✓] Construct one or multiple docker files for your code (M10)
+* [✓] Build the docker files locally and make sure they work as intended (M10)
+* [✓] Write one or multiple configurations files for your experiments (M11)
 * [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
-* [ ] Use logging to log important events in your code (M14)
-* [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [✓] Use logging to log important events in your code (M14)
+* [✓] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
-* [ ] Write unit tests related to the data part of your code (M16)
-* [ ] Write unit tests related to model construction and or model training (M16)
-* [ ] Calculate the code coverage (M16)
-* [ ] Get some continuous integration running on the GitHub repository (M17)
-* [ ] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [ ] Add a linting step to your continuous integration (M17)
+* [✓] Write unit tests related to the data part of your code (M16)
+* [✓] Write unit tests related to model construction and or model training (M16)
+* [✓] Calculate the code coverage (M16)
+* [✓] Get some continuous integration running on the GitHub repository (M17)
+* [✓] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
+* [✓] Add a linting step to your continuous integration (M17)
 * [ ] Add pre-commit hooks to your version control setup (M18)
-* [ ] Add a continues workflow that triggers when data changes (M19)
-* [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
-* [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
-* [ ] Create a trigger workflow for automatically building your docker images (M21)
+* [✓] Add a continues workflow that triggers when data changes (M19)
+* [✓] Add a continues workflow that triggers when changes to the model registry is made (M19)
+* [✓] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
+* [✓] Create a trigger workflow for automatically building your docker images (M21)
 * [ ] Get your model training in GCP using either the Engine or Vertex AI (M21)
-* [ ] Create a FastAPI application that can do inference using your model (M22)
-* [ ] Deploy your model in GCP using either Functions or Run as the backend (M23)
-* [ ] Write API tests for your application and setup continues integration for these (M24)
+* [✓] Create a FastAPI application that can do inference using your model (M22)
+* [✓] Deploy your model in GCP using either Functions or Run as the backend (M23)
+* [] Write API tests for your application and setup continues integration for these (M24)
 * [ ] Load test your application (M24)
 * [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
 * [ ] Create a frontend for your API (M26)
@@ -99,7 +99,7 @@ will check the repositories and the code to verify your answers.
 
 * [ ] Check how robust your model is towards data drifting (M27)
 * [ ] Deploy to the cloud a drift detection API (M27)
-* [ ] Instrument your API with a couple of system metrics (M28)
+* [✓] Instrument your API with a couple of system metrics (M28)
 * [ ] Setup cloud monitoring of your instrumented application (M28)
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
 * [ ] If applicable, optimize the performance of your data loading using distributed data loading (M29)
@@ -108,12 +108,12 @@ will check the repositories and the code to verify your answers.
 
 ### Extra
 
-* [ ] Write some documentation for your application (M32)
+* [✓] Write some documentation for your application (M32)
 * [ ] Publish the documentation to GitHub Pages (M32)
-* [ ] Revisit your initial project description. Did the project turn out as you wanted?
+* [✓] Revisit your initial project description. Did the project turn out as you wanted?
 * [ ] Create an architectural diagram over your MLOps pipeline
-* [ ] Make sure all group members have an understanding about all parts of the project
-* [ ] Uploaded all your code to GitHub
+* [✓] Make sure all group members have an understanding about all parts of the project
+* [✓] Uploaded all your code to GitHub
 
 ## Group information
 
@@ -575,6 +575,8 @@ We didn't end up implementing any extra features beyond the core requirements. H
 >
 > Answer:
 
+We didn't manage to do this unfortunaly, as we couldn't get done that was worth submitting. sorry
+
 --- question 29 fill here ---
 
 ### Question 30
@@ -589,13 +591,17 @@ We didn't end up implementing any extra features beyond the core requirements. H
 >
 > Answer:
 
-The biggest struggle was honestly just getting all the different tools to play nice with each other. We spent way more time on infrastructure than we expected. Setting up the CI/CD pipeline with GitHub Actions took forever because we kept running into weird permission issues with GCP authentication.
+Honestly, the biggest struggle was just time management and coordinating as a team. With five people working on different parts, it was sometimes hard to keep track of who was doing what and making sure we weren't duplicating work or breaking each other's code. We set up a group chat and tried to communicate whenever we pushed changes, but there were still moments where someone would push something that broke the tests and we'd have to track it down.
 
-Weights & Biases also gave us some headaches. Getting it fully connected and logging properly took several attempts - it would work locally but then fail in CI, or the logging would just silently not work and we wouldn't notice until later. We eventually figured out we needed to handle the W&B initialization more carefully and add proper error handling, but it cost us a few hours of debugging time.
+Getting Weights & Biases working smoothly took longer than expected. It kept disconnecting or not logging properly at first, and we had to spend some time figuring out the right way to initialize it in our training script. Once we got it working though, it was really useful for tracking our experiments.
 
-DVC was another learning curve. The concept is simple, but actually getting the authentication with GCP buckets working and making sure everyone on the team could pull data smoothly required some trial and error. We had one teammate who kept getting permission errors that we couldn't reproduce, which turned out to be their GCP credentials not being set up right.
+We also spent a surprising amount of time on documentation and writing tests. It's not the most exciting part of coding, but we realized pretty quickly that without proper tests, we kept breaking things without noticing. Writing 60 tests sounds like a lot, but it actually saved us from some embarrassing bugs later on.
 
-Docker also bit us a few times. We initially didn't understand layer caching properly, so our builds were taking forever every time we changed a single line of code. Once we restructured the Dockerfiles to copy dependencies before source code, builds got way faster. But figuring that out required reading through Docker docs and some Stack Overflow threads.
+Docker was confusing at first since none of us had used it much before. Understanding the difference between building images and running containers, figuring out how to mount volumes, and getting the networking right for the API took some trial and error. We ended up watching some YouTube tutorials.
+
+The GCP setup was also new to most of us. Creating buckets, setting up service accounts, and getting all the permissions right felt like a lot of bureaucracy, but once it was done it worked fine. We just had to be patient and follow the course materials step by step.
+
+Overall, we overcame these challenges by staying organized, asking for help when stuck (both from each other and online resources), and not trying to do everything at once. Breaking the project into smaller tasks made it way more manageable.
 
 ### Question 31
 
@@ -612,4 +618,18 @@ Docker also bit us a few times. We initially didn't understand layer caching pro
 > *All members contributed to code by...*
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
+
+Student s234869 (Alexander Hougaard) was responsible for setting up Weights & Biases integration for experiment tracking, creating the initial report structure, and implementing the data pipeline with train/validation/test splits.
+
+Student s245176 (Valdemar Stamm) was in charge of setting up the initial cookiecutter project structure, DVC configuration with GCS remote storage, and writing documentation including the QUICKSTART guide.
+
+Student s244742 (William Hyldig) was responsible for developing the Docker containers for training and inference (train.dockerfile, evaluate.dockerfile, api.dockerfile), setting up Google Cloud Build automation for automatic image builds, and configuring pre-commit hooks.
+
+Student s245362 (Frederik Jønsson) was in charge of implementing the FastAPI inference API, writing unit tests and integration tests (53 tests total), and setting up continuous integration with GitHub Actions.
+
+Student s246089 (Gustav Christensen) was responsible for implementing the logging system throughout the codebase, model training and hyperparameter configuration with Hydra, and setting up the Intel Mac compatibility guide.
+
+It should be noted that our commit history may not fully reflect the actual distribution of work. We spent significant time working together at the DTU library, where we set up on a large screen and collaborated in real-time, discussing solutions and debugging together. In these sessions, we often pushed from a single computer, which means that the commit authorship doesn't accurately represent everyone's contributions.
+
+For generative AI tools, we used GitHub Copilot occasionally for code completion, but not extensively. Most of the code was written manually by the team members.
 
