@@ -27,7 +27,7 @@ dependencies = [
     "prometheus-fastapi-instrumentator>=7.0.0",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
-    "torch==2.6.0; sys_platform != 'darwin' or platform_machine == 'arm64'",
+    "torch==2.10.0; sys_platform != 'darwin' or platform_machine == 'arm64'",
     "transformers>=4.57.5",
     "typer==0.12.5",
     "uvicorn==0.34.0",
