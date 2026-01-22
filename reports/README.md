@@ -415,7 +415,9 @@ We did not use GCP Compute Engine in our project. Compute Engine would have been
 >
 > Answer:
 
---- question 19 fill here ---
+![GCP Bucket](figures/bucket.jpeg)
+
+Our GCP bucket `mlops-dtu-data` stores our DVC cache, which contains our processed datasets and trained model files. The bucket is organized with the DVC cache structure where files are stored using content-addressable storage - each file is named by its hash value. This includes our processed train/validation/test datasets from the SetFit/onestop_english dataset, as well as our trained model checkpoints from different epochs. The bucket is linked to our local DVC setup, so team members can pull data using `uv run dvc pull` without having to manually download files. This setup keeps our Git repository clean while still providing version control for our data and models.
 
 ### Question 20
 
@@ -424,7 +426,9 @@ We did not use GCP Compute Engine in our project. Compute Engine would have been
 >
 > Answer:
 
---- question 20 fill here ---
+![Artifact Registry](figures/artifact_registry.jpeg)
+
+Our GCP Artifact Registry in `europe-west1 (Belgium)` contains two Docker repositories: **my-container-registry** and **my-docker-repo**. Both are standard Docker format repositories that are actively maintained. These repositories store our containerized application images built via Cloud Build. The registry is integrated with our CI/CD pipeline, automatically receiving new image versions when our GitHub Actions workflow triggers builds using `gcloud builds submit`. The Artifact Registry provides secure, geo-replicated storage for our Docker images and enables seamless integration with Cloud Run for deployment.
 
 ### Question 21
 
@@ -433,7 +437,9 @@ We did not use GCP Compute Engine in our project. Compute Engine would have been
 >
 > Answer:
 
---- question 21 fill here ---
+![Cloud Build History](figures/cloud.jpeg)
+
+Our Cloud Build history shows the automated Docker image builds triggered by our CI/CD pipeline. Each build is initiated when we push code changes to GitHub - our GitHub Actions workflow authenticates with GCP and runs `gcloud builds submit . --config cloudbuild.yaml`. The build process pulls our DVC-tracked data and models from Cloud Storage, builds the Docker images for our training, API, and evaluation containers, and pushes them to Artifact Registry. The builds typically complete in a few minutes depending on whether Docker layer caching is effective. Having this automated pipeline saved us a ton of time since we didn't need to manually build and push images every time we made changes to the code. The build history also provides traceability - we can see exactly when each image was built and link it back to specific code commits.
 
 ### Question 22
 
@@ -448,7 +454,7 @@ We did not use GCP Compute Engine in our project. Compute Engine would have been
 >
 > Answer:
 
---- question 22 fill here ---
+We didn't end up training our model in the cloud using Compute Engine or Vertex AI. The main reason was that our model is pretty small - BERT-mini has only 11M parameters, which is tiny compared to modern LLMs. Training 10 epochs took around 4-5 minutes on a regular laptop CPU, so spinning up cloud infrastructure for that just didn't make sense. It would honestly take longer to set up the VM, configure everything, and wait for the job to start than to just run it locally. We also had limited GCP credits and wanted to prioritize using them for things that actually needed cloud resources, like hosting our API on Cloud Run and storing data in Cloud Storage. If we were training something like a big model or doing extensive hyperparameter sweeps that would take hours or days, then cloud training would definitely be worth it for the  GPU access. But for our use case, local training was just faster and more practical.
 
 ## Deployment
 
@@ -481,7 +487,7 @@ We implemented a FastAPI application in `src/ml_ops_assignment/api.py`. The API 
 >
 > Answer:
 
---- question 24 fill here ---
+We got the API running locally without issues - you just run `uv run uvicorn ml_ops_assignment.api:app --reload` and it spins up on localhost:8000. We tested it with curl commands and it worked perfectly for making predictions. However, we didn't actually deploy it to Cloud Run in production. Our cloudbuild.yaml builds the API Docker image and pushes it to Artifact Registry, so all the infrastructure is there, but we never ran the actual `gcloud run deploy` command to get it live on a public URL. Honestly, we ran out of time. The local deployment was good enough for testing and demonstrating that everything works. If we had deployed it, you'd invoke it with something like `curl -X POST https://api-url.run.app/predict -H "Content-Type: application/json" -d '{"text": "This is a test sentence"}'` to get back the text difficulty prediction.
 
 ### Question 25
 
@@ -511,6 +517,8 @@ For unit testing we used **pytest** with FastAPI's `TestClient`. We have 4 test 
 >
 > Answer:
 
+We didn't actually get around to implementing monitoring since we spent most of our time getting the CI/CD pipeline and the basic testing infrastructure solid. But looking back, monitoring would have been huge for keeping the app healthy over time. Specifically, it would help us catch things like data drift—like if people started using different slang or text styles that our BERT model wasn't trained on. We'd also want to track system stuff like latency and memory usage so we'd know if the API was starting to lag before users even noticed. Having those alerts set up would mean we could actually fix things before they break, instead of just reacting when the service goes down. It would basically make the whole thing much more "production-ready" by ensuring it stays accurate as the data evolves.
+
 --- question 26 fill here ---
 
 ## Overall discussion of project
@@ -530,6 +538,10 @@ For unit testing we used **pytest** with FastAPI's `TestClient`. We have 4 test 
 >
 > Answer:
 
+![usage](figures/usage.jpeg)
+
+We didn't actually get around to implementing monitoring since we spent most of our time getting the CI/CD pipeline and the basic testing infrastructure solid. But looking back, monitoring would have been huge for keeping the app healthy over time. Specifically, it would help us catch things like data drift—like if people started using different slang or text styles that our BERT model wasn't trained on. We'd also want to track system stuff like latency and memory usage so we'd know if the API was starting to lag before users even noticed. Having those alerts set up would mean we could actually fix things before they break, instead of just reacting when the service goes down. It would basically make the whole thing much more "production-ready" by ensuring it stays accurate as the data evolves.
+
 --- question 27 fill here ---
 
 ### Question 28
@@ -546,7 +558,7 @@ For unit testing we used **pytest** with FastAPI's `TestClient`. We have 4 test 
 >
 > Answer:
 
---- question 28 fill here ---
+We didn't end up implementing any extra features beyond the core requirements. Honestly, we had our hands full just getting the basic pipeline working - CI/CD, Docker containers, DVC setup, and Cloud Build integration took way more time than we expected. We also ran into several unexpected issues along the way, like problems with model training reproducibility, Weights & Biases logging configuration breaking at one point, and some annoying dependency conflicts that ate up debugging time. By the time we got everything stable and working, we were pretty much at the deadline. If we'd had more time, it would've been cool to implement something like a simple Streamlit frontend for the API or set up proper monitoring with Prometheus, but we prioritized making sure the core MLOps pipeline was solid first.
 
 ### Question 29
 
@@ -577,7 +589,13 @@ For unit testing we used **pytest** with FastAPI's `TestClient`. We have 4 test 
 >
 > Answer:
 
---- question 30 fill here ---
+The biggest struggle was honestly just getting all the different tools to play nice with each other. We spent way more time on infrastructure than we expected. Setting up the CI/CD pipeline with GitHub Actions took forever because we kept running into weird permission issues with GCP authentication.
+
+Weights & Biases also gave us some headaches. Getting it fully connected and logging properly took several attempts - it would work locally but then fail in CI, or the logging would just silently not work and we wouldn't notice until later. We eventually figured out we needed to handle the W&B initialization more carefully and add proper error handling, but it cost us a few hours of debugging time.
+
+DVC was another learning curve. The concept is simple, but actually getting the authentication with GCP buckets working and making sure everyone on the team could pull data smoothly required some trial and error. We had one teammate who kept getting permission errors that we couldn't reproduce, which turned out to be their GCP credentials not being set up right.
+
+Docker also bit us a few times. We initially didn't understand layer caching properly, so our builds were taking forever every time we changed a single line of code. Once we restructured the Dockerfiles to copy dependencies before source code, builds got way faster. But figuring that out required reading through Docker docs and some Stack Overflow threads.
 
 ### Question 31
 
