@@ -1,0 +1,35 @@
+{
+  "os": "macOS-14.6.1-arm64-arm-64bit",
+  "python": "CPython 3.12.3",
+  "startedAt": "2026-01-22T15:13:29.684909Z",
+  "program": "-m ml_ops_assignment.train",
+  "git": {
+    "remote": "git@github.com:Trexz14/ml-ops-assignment.git",
+    "commit": "0cbff8a4ae701c012f2818dc7d2f115a3a16057f"
+  },
+  "email": "valdemar.stamm@gmail.com",
+  "root": "/Users/valdemarstamm/Desktop/DTU/3. Semester/3-Ugers Shit/Machine Learning Operations/ml-ops-assignment",
+  "host": "mbptilhvaldemar.students.clients.local",
+  "executable": "/Users/valdemarstamm/Desktop/DTU/3. Semester/3-Ugers Shit/Machine Learning Operations/ml-ops-assignment/.venv/bin/python3",
+  "cpu_count": 12,
+  "cpu_count_logical": 12,
+  "disk": {
+    "/": {
+      "total": "994662584320",
+      "used": "402830667776"
+    }
+  },
+  "memory": {
+    "total": "19327352832"
+  },
+  "apple": {
+    "name": "Apple M3 Pro",
+    "ecpuCores": 6,
+    "pcpuCores": 6,
+    "gpuCores": 18,
+    "memoryGb": 18,
+    "swapTotalBytes": "9663676416",
+    "ramTotalBytes": "19327352832"
+  },
+  "writerId": "jvdxvmkkvggvxmt94jw517yuoxia89zz"
+}

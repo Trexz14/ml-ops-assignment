@@ -24,6 +24,7 @@ dependencies = [
     "fastapi==0.115.6",
     "loguru>=0.7.3",
     "markdown>=3.10",
+    "prometheus-fastapi-instrumentator>=7.0.0",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
     "torch==2.6.0; sys_platform != 'darwin' or platform_machine == 'arm64'",

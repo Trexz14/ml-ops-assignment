@@ -47,15 +47,15 @@ def main(
     wandb_project = os.getenv("WANDB_PROJECT")
     wandb_entity = os.getenv("WANDB_ENTITY")
 
-    if wandb_project and wandb_entity:
-        logger.info(f"Initializing W&B: project={wandb_project}, entity={wandb_entity}")
+    if wandb_project:
+        logger.info(f"Initializing W&B: project={wandb_project}, entity={wandb_entity or 'default'}")
         wandb.init(
             project=wandb_project,
-            entity=wandb_entity,
+            entity=wandb_entity if wandb_entity else None,
         )
         logger.success("W&B initialized successfully")
     else:
-        logger.warning("W&B credentials not found in environment variables. Skipping W&B initialization.")
+        logger.warning("W&B PROJECT not found in environment variables. Skipping W&B initialization.")
 
     # Train the model
     train(config_path=config_path, checkpoint_path=checkpoint)
