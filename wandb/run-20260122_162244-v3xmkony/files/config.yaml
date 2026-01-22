@@ -1,0 +1,55 @@
+_wandb:
+    value:
+        cli_version: 0.24.0
+        e:
+            iyl2o8wrnfjhk73d9zxhzknwopgbs4s5:
+                apple:
+                    ecpuCores: 6
+                    gpuCores: 18
+                    memoryGb: 18
+                    name: Apple M3 Pro
+                    pcpuCores: 6
+                    ramTotalBytes: "19327352832"
+                    swapTotalBytes: "8589934592"
+                cpu_count: 12
+                cpu_count_logical: 12
+                disk:
+                    /:
+                        total: "994662584320"
+                        used: "402065108992"
+                email: valdemar.stamm@gmail.com
+                executable: /Users/valdemarstamm/Desktop/DTU/3. Semester/3-Ugers Shit/Machine Learning Operations/ml-ops-assignment/.venv/bin/python3
+                git:
+                    commit: 0cbff8a4ae701c012f2818dc7d2f115a3a16057f
+                    remote: git@github.com:Trexz14/ml-ops-assignment.git
+                host: mbptilhvaldemar.students.clients.local
+                memory:
+                    total: "19327352832"
+                os: macOS-14.6.1-arm64-arm-64bit
+                program: -m ml_ops_assignment.train
+                python: CPython 3.12.3
+                root: /Users/valdemarstamm/Desktop/DTU/3. Semester/3-Ugers Shit/Machine Learning Operations/ml-ops-assignment
+                startedAt: "2026-01-22T15:22:44.607596Z"
+                writerId: iyl2o8wrnfjhk73d9zxhzknwopgbs4s5
+        m: []
+        python_version: 3.12.3
+        t:
+            "1":
+                - 1
+                - 11
+                - 49
+                - 51
+                - 105
+            "2":
+                - 1
+                - 11
+                - 49
+                - 51
+                - 105
+            "3":
+                - 2
+            "4": 3.12.3
+            "5": 0.24.0
+            "6": 4.57.5
+            "12": 0.24.0
+            "13": darwin-arm64

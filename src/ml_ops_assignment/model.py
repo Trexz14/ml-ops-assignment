@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 import torch
+import wandb
 import yaml
 from torch import nn
 from torch.optim import Adam
@@ -433,6 +434,16 @@ def train(
             f"Train Loss={avg_train_loss:.4f}, Train Acc={train_accuracy:.2f}%, "
             f"Val Loss={avg_val_loss:.4f}, Val Acc={val_accuracy:.2f}%"
         )
+
+        # Log to W&B if active
+        if wandb.run is not None:
+            wandb.log({
+                "epoch": epoch + 1,
+                "train/loss": avg_train_loss,
+                "train/accuracy": train_accuracy,
+                "val/loss": avg_val_loss,
+                "val/accuracy": val_accuracy,
+            })
 
         # Save checkpoint
         if (epoch + 1) % training_config["save_every"] == 0:

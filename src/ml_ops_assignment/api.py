@@ -4,6 +4,7 @@ from pathlib import Path
 
 import torch
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from transformers import AutoTokenizer
 
@@ -93,6 +94,9 @@ app = FastAPI(
     version="0.0.1",
     lifespan=lifespan,
 )
+
+# Instrument the app with Prometheus metrics
+Instrumentator().instrument(app).expose(app)
 
 
 @app.get("/")
