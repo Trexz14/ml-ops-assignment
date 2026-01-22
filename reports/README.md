@@ -332,7 +332,19 @@ We secured reproducibility through several mechanisms. First, all hyperparameter
 >
 > Answer:
 
---- question 14 fill here ---
+We tracked our training experiments using Weights & Biases throughout the project. As seen in the first image, we track the epoch-level training and validation loss, as well as training and validation accuracy across all 10 epochs. These metrics are essential for understanding model convergence and detecting overfitting - if validation metrics diverge significantly from training metrics, it indicates the model is memorizing rather than generalizing.
+
+![Training and validation metrics](figures/train_and_val.png)
+
+The second image shows our epoch progression over time, which helps us understand the training duration and identify any anomalies during the training process. This temporal view is useful for debugging infrastructure issues or spotting when training might have stalled.
+
+![Epoch progression](figures/epochs.png)
+
+The third image displays system metrics including GPU utilization, CPU usage, memory consumption, and network traffic during training. Monitoring these metrics is critical for optimizing resource usage and identifying bottlenecks. For example, low GPU utilization might indicate data loading is the bottleneck, while high memory usage could signal the need to reduce batch size.
+
+![System metrics](figures/system.png)
+
+By tracking all these metrics together, W&B gives us a comprehensive view of both model performance and system health, making it easy to compare runs, debug issues, and share results with the team.
 
 ### Question 15
 
@@ -394,7 +406,7 @@ We used the following GCP services: **Cloud Storage (Buckets)** for storing our 
 >
 > Answer:
 
---- question 18 fill here ---
+We did not use GCP Compute Engine in our project. Compute Engine would have been useful for running long-running training jobs on VMs with specific hardware configurations, particularly if we needed GPU acceleration for faster training or wanted more control over the compute environment. We could have spun up instances with NVIDIA GPUs, installed our dependencies, and run training jobs directly on the VMs. However, we chose not to use Compute Engine for a few reasons. First, our model (BERT-mini with only 11M parameters) trained quickly enough on CPU that GPU acceleration wasn't necessary - training 10 epochs took only about 4-5 minutes. For training, we mostly worked locally during development since iteration was fast enough. If we had a larger model or dataset requiring days of training, Compute Engine with GPU instances would have been a more appropriate choice.
 
 ### Question 19
 
