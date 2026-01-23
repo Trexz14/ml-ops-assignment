@@ -16,11 +16,11 @@ A machine learning system for classifying English text readability levels (Eleme
 
 | Student Number |
 |----------------|
-| s234869 (Alexander Hougaard)|
-| s245176 (William Hyldig)    |
-| s244742 (Valdemar Stamm)    |
-| s245362 (Frederik Jønsson)  |
-| s246089 (Gustav Christensen)|
+| s234869 (Alexander Hougaard) (GitHub: Alexander-bit-boop)|
+| s245176 (William Hyldig) (GitHub: Williamhyldig)         |
+| s244742 (Valdemar Stamm) (GitHub: HrStamm)               |
+| s245362 (Frederik Jønsson) (GitHub: Trex14)              |
+| s246089 (Gustav Christensen) (GitHub: DonConarch)        |
 
 ## Overview
 
