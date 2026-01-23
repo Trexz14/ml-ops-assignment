@@ -10,6 +10,18 @@ A machine learning system for classifying English text readability levels (Eleme
 > **⚠️ Intel Mac Users:** This project uses PyTorch 2.6.0, which doesn't have wheels for Intel Macs with `uv`. 
 > Please see [INTEL_MAC_GUIDE.md](INTEL_MAC_GUIDE.md) for Docker-based setup instructions.
 
+## Made By
+
+**Group 63** - DTU Course 02476 Machine Learning Operations
+
+| Student Number |
+|----------------|
+| s234869 (Alexander Hougaard)|
+| s245176 (William Hyldig)    |
+| s244742 (Valdemar Stamm)    |
+| s245362 (Frederik Jønsson)  |
+| s246089 (Gustav Christensen)|
+
 ## Overview
 
 This project was developed as part of the **02476 Machine Learning Operations** course at DTU. The goal is to build a production-ready ML pipeline that predicts text readability levels on a 0-2 scale:
@@ -234,18 +246,6 @@ The project uses the [OneStop English](https://huggingface.co/datasets/SetFit/on
 - **Training**: 80% of the data
 - **Validation**: 10% of the data
 - **Test**: 10% of the data
-
-## Made By
-
-**Group 63** - DTU Course 02476 Machine Learning Operations
-
-| Student Number |
-|----------------|
-| s234869 |
-| s245176 |
-| s244742 |
-| s245362 |
-| s246089 |
 
 ## Acknowledgments
 
