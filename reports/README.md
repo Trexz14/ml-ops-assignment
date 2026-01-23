@@ -621,9 +621,9 @@ Overall, we overcame these challenges by staying organized, asking for help when
 
 Student s234869 (Alexander Hougaard) was responsible for setting up Weights & Biases integration for experiment tracking, creating the initial report structure, and implementing the data pipeline with train/validation/test splits.
 
-Student s245176 (Valdemar Stamm) was in charge of setting up the initial cookiecutter project structure, DVC configuration with GCS remote storage, and writing documentation including the QUICKSTART guide.
+Student s244742 (Valdemar Stamm) was in charge of setting up the initial cookiecutter project structure, DVC configuration with GCS remote storage, and writing documentation including the QUICKSTART guide.
 
-Student s244742 (William Hyldig) was responsible for developing the Docker containers for training and inference (train.dockerfile, evaluate.dockerfile, api.dockerfile), setting up Google Cloud Build automation for automatic image builds, and configuring pre-commit hooks.
+Student s245176 (William Hyldig) was responsible for developing the Docker containers for training and inference (train.dockerfile, evaluate.dockerfile, api.dockerfile), setting up Google Cloud Build automation for automatic image builds, and configuring pre-commit hooks.
 
 Student s245362 (Frederik Jønsson) was in charge of implementing the FastAPI inference API, writing unit tests and integration tests (53 tests total), and setting up continuous integration with GitHub Actions.
 
