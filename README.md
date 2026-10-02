@@ -19,12 +19,12 @@ A machine learning system for classifying English text readability levels (Eleme
 | s234869 (Alexander Hougaard) (GitHub: Alexander-bit-boop)|
 | s245176 (William Hyldig) (GitHub: Williamhyldig)         |
 | s244742 (Valdemar Stamm) (GitHub: HrStamm)               |
-| s245362 (Frederik Jønsson) (GitHub: Trex14)              |
+| s245362 (Frederik Jønsson) (GitHub: [Trexz14](https://github.com/Trexz14)) |
 | s246089 (Gustav Christensen) (GitHub: DonConarch)        |
 
 ## Overview
 
-This project was developed as part of the **02476 Machine Learning Operations** course at DTU. The goal is to build a production-ready ML pipeline that predicts text readability levels on a 0-2 scale:
+This project was developed as part of the **02476 Machine Learning Operations** course at DTU. It builds an end-to-end ML pipeline that predicts text readability levels on a 0-2 scale:
 
 - **0**: Elementary (simple vocabulary and sentence structure)
 - **1**: Intermediate (moderate complexity)
@@ -47,7 +47,7 @@ For detailed setup instructions, see [QUICKSTART.md](QUICKSTART.md).
 
 ```bash
 # Clone the repository
-git clone <repo-url>
+git clone https://github.com/Trexz14/ml-ops-assignment.git
 cd ml-ops-assignment
 
 # Install dependencies (requires uv)
